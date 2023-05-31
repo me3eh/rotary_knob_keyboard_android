@@ -5,10 +5,4 @@
     <color name="label">#FBFBFB</color>
     <color name="bar">#292929</color>
     <color name="cursor">#66FFFFFF</color>
-
-    <color name="mode_key">#333333</color>
-    <color name="mode_key_border">#AAAAAA</color>
-    <color name="mode_key_border_selected">#00ff55</color>
-
-    <color name="violet">#694BFF</color>
 </resources>
