@@ -2,7 +2,9 @@ package com.dama.utils;
 
 public class Utils {
     public static String colorToString(int color){
-
-        return null;
+        //Convert int color in String #RRGGBB
+        return String.format("#%06X", (0xFFFFFF & color));
     }
+
+
 }

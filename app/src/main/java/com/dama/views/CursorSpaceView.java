@@ -30,7 +30,6 @@ public class CursorSpaceView extends FrameLayout {
         //init cursor
         Drawable cs = getResources().getDrawable(R.drawable.cursor);
         cursor = new KeyView(getContext(), cs, null, "#FBFBFB");
-        //moveCursor(keyView);
         initPosition(keyView);
     }
 
