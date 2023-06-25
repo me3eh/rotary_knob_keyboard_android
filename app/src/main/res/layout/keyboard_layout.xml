@@ -4,15 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/background">
-    <com.dama.views.CursorSpaceView
-        android:id="@+id/cursorSpace_view"
+    <com.dama.views.ContainerView
+        android:id="@+id/container_view"
         android:layout_gravity="center_horizontal"
         android:layout_marginVertical="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <com.dama.views.KeyboardView
+            android:paddingHorizontal="3dp"
             android:id="@+id/keyboard_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-    </com.dama.views.CursorSpaceView>
+    </com.dama.views.ContainerView>
 </FrameLayout>

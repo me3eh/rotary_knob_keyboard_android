@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background">#030303</color>
-    <color name="keys">#0A0A0A</color>
+    <color name="keys">#191919</color>
     <color name="label">#FBFBFB</color>
     <color name="bar">#292929</color>
     <color name="cursor">#66FFFFFF</color>
+    <color name="violet">#5956D6</color>
 </resources>

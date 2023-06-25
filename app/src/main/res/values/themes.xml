@@ -1,4 +1,4 @@
 <resources>
 
-    <style name="Theme.CustomKeyboard3" parent="@style/Theme.Leanback" />
+    <style name="Theme.KeyboardBase" parent="@style/Theme.Leanback" />
 </resources>

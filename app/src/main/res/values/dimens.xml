@@ -2,8 +2,9 @@
 <resources>
     <dimen name="key_height">33dp</dimen>
     <dimen name="key_width">51dp</dimen>
-    <dimen name="key_text_size">11dp</dimen>
+    <dimen name="key_text_size">11sp</dimen>
     <dimen name="key_radius">12dp</dimen>
+    <dimen name="key_margin_right">4dp</dimen>
 
     <dimen name="mode_key_height">20dp</dimen>
     <dimen name="mode_key_width">20dp</dimen>
