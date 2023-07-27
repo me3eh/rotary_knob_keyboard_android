@@ -45,6 +45,11 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     @Override
+    public boolean onEvaluateFullscreenMode() {
+        return false;
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyboardShown){
             Log.d("KeyboardImeService", "onKeyDown code: "+ keyCode);
@@ -66,7 +71,9 @@ public class KeyboardImeService extends InputMethodService {
                 case KeyEvent.KEYCODE_DPAD_UP:
                     temaImeLogger.writeToLog("UP",false);
                 case KeyEvent.KEYCODE_DPAD_DOWN:
-                    temaImeLogger.writeToLog("DOWN",false);
+                    if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN){
+                        temaImeLogger.writeToLog("DOWN",false);
+                    }
                     Cell newCell = controller.findNewFocus(keyCode);
                     if (controller.isNextFocusable(newCell)){
                         //update focus
@@ -75,10 +82,20 @@ public class KeyboardImeService extends InputMethodService {
                     }
                     break;
                 case KeyEvent.KEYCODE_DPAD_CENTER:
-                    temaImeLogger.writeToLog("CENTER",false);
                 case KeyEvent.KEYCODE_0:    //todo remove - just for emulator test OK
                     Cell focus = controller.getFocusController_().getCurrentFocus();
                     Key key = controller.getKeysController().getKeyAtPosition(focus);
+
+
+                    String btn;
+                    if(key.getCode() == Controller.ENTER_KEY)
+                        btn = "INVIO";
+                    else btn = key.getLabel();
+                    temaImeLogger.writeToLog("CENTER: "+btn,false);
+
+
+
+
                     int code = key.getCode();
                     if(code!=Controller.FAKE_KEY){
                         handleText(code, ic);

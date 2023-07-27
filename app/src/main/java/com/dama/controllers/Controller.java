@@ -23,8 +23,8 @@ public class Controller {
     private ViewsController viewsController;
 
     public Controller(Context context, FrameLayout rootView) {
-        //keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
-        keysController = new KeysController(new Keyboard(context, R.xml.abc));
+        keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
+        //keysController = new KeysController(new Keyboard(context, R.xml.abc));
         focusController = new FocusController();
         focusController.setCurrentFocus(new Cell(1,0)); //q
         viewsController = new ViewsController(rootView);
