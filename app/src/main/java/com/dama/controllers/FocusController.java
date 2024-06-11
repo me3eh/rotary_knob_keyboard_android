@@ -1,5 +1,6 @@
 package com.dama.controllers;
 
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.dama.utils.Cell;
@@ -16,30 +17,29 @@ public class FocusController {
     public Cell calculateNewFocus(int arrowCode){
         Cell newCell = new Cell(0,0);
         int cols = 0;
-
         switch (arrowCode){
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 newCell.setRow(currentFocus.getRow());
                 newCell.setCol(currentFocus.getCol()-1);
 
-                if(newCell.getRow() == Controller.ROWS-1)
-                    cols = Controller.COLS-4;
-                else cols = Controller.COLS-1;
-                if(newCell.getCol()<0){
-                    newCell.setCol(cols);
-                }
+//                if(newCell.getRow() == Controller.ROWS-1)
+//                    cols = Controller.COLS-4;
+//                cols = Controller.COLS-1;
+//                if(newCell.getCol()<0){
+//                    newCell.setCol(cols);
+//                }
 
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 newCell.setRow(currentFocus.getRow());
                 newCell.setCol(currentFocus.getCol()+1);
 
-                if(newCell.getRow() == Controller.ROWS-1)
-                    cols = Controller.COLS-4;
-                else cols = Controller.COLS-1;
-                if(newCell.getCol()>cols){
-                    newCell.setCol(0);
-                }
+//                if(newCell.getRow() == Controller.ROWS-1)
+//                    cols = Controller.COLS-4;
+//                cols = Controller.COLS-1;
+//                if(newCell.getCol()>cols){
+//                    newCell.setCol(0);
+//                }
 
                 break;
             case KeyEvent.KEYCODE_DPAD_DOWN:
@@ -56,15 +56,16 @@ public class FocusController {
 
     public boolean isFocusInRange(Cell newFocus) {
         int cols = Controller.COLS;
-        if(newFocus.getRow() == Controller.ROWS-1){
-            cols = Controller.COLS-3;
-        }
+//        if(newFocus.getRow() == Controller.ROWS-1){
+//            cols = Controller.COLS-3;
+//        }
         return (newFocus.getCol() < cols && newFocus.getRow() < Controller.ROWS && newFocus.isValidPosition());
     }
 
     /*******************GETTERS/SETTERS********************/
 
     public Cell getCurrentFocus() {
+//        currentFocus = new Cell(0,0);
         return currentFocus;
     }
 

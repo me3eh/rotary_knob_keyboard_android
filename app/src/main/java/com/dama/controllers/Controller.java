@@ -5,13 +5,13 @@ import android.inputmethodservice.Keyboard;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.FrameLayout;
-
 import com.dama.customkeyboardbase.R;
+
 import com.dama.utils.Cell;
 
 public class Controller {
-    public static final int COLS = 10;
-    public static final int ROWS = 5;
+    public static final int COLS = 16;
+    public static final int ROWS = 1;
     public static final int INVALID_KEY = -1;
     public static final int HIDDEN_KEY = -3;
     public static final int SPACE_KEY = 32;
@@ -22,11 +22,14 @@ public class Controller {
     private KeysController keysController;
     private ViewsController viewsController;
 
-    public Controller(Context context, FrameLayout rootView) {
-        keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
+    public Controller(Context context, FrameLayout rootView, int version) {
+        if(version == 3)
+            keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
+        else
+            keysController = new KeysController(new Keyboard(context, R.xml.qwerty4row));
         //keysController = new KeysController(new Keyboard(context, R.xml.abc));
         focusController = new FocusController();
-        focusController.setCurrentFocus(new Cell(1,0)); //q
+        focusController.setCurrentFocus(new Cell(0,3)); //q
         viewsController = new ViewsController(rootView);
         //viewsController.drawKeyboard(keysController.getAllKeys(), focusController.getCurrentFocus());
     }
@@ -37,11 +40,9 @@ public class Controller {
 
     /*********************FOCUS**********************/
     public boolean isNextFocusable(Cell newFocus){
-        Log.d("newFocus", ""+newFocus);
         if(focusController.isFocusInRange(newFocus)
                 && !(keysController.isInvalidKey(newFocus))
                 && !(keysController.isHiddenKey(newFocus))){
-            Log.d("ok","ok");
             return true;
         }
         return false;
@@ -110,8 +111,11 @@ public class Controller {
     }
 
     /*********************OTHER**********************/
-    protected void modifyKeyContent(Cell position, int code, String label){
-        keysController.modifyKeyAtPosition(position, code, label);
+    public void modifyKeyContent(Cell position, String label){
+        keysController.modifyKeyAtPosition(position, label);
         viewsController.modifyKeyLabel(position, label);
+    }
+    public String getLabelAtPosition(Cell position){
+        return keysController.getLabelAtPosition(position);
     }
 }

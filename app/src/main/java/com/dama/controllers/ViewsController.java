@@ -2,11 +2,13 @@ package com.dama.controllers;
 
 import android.widget.FrameLayout;
 import com.dama.customkeyboardbase.R;
+
 import com.dama.utils.Cell;
 import com.dama.utils.Key;
 import com.dama.views.ContainerView;
 import com.dama.views.KeyView;
 import com.dama.views.KeyboardView;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 

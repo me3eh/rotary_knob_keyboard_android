@@ -25,16 +25,16 @@ public class KeysController {
     private void loadKeys(Keyboard keyboard){
         if(keys.size()==0){
             int cols = Controller.COLS;
-            for(int i=0, w=0; i<Controller.ROWS; i++) {
+            for(int i=0, w=0; i<Controller.ROWS; ++i) {
                 ArrayList<Key> rowKeys = new ArrayList<>();
-                if (i == (Controller.ROWS - 1)) cols = Controller.COLS - 3; //todo mod was 7
-                for (int j = 0; j < cols; j++) {
-                        Keyboard.Key k = keyboard.getKeys().get(getKeyIndex(new Cell(w, j)));
-                        Key key = new Key(k.codes[0], k.label.toString(), k.icon);
-                        //Log.d("mmmm","k: "+key+" - size cell: "+new Cell(w, m));
-                        if(key.getLabel().length()>0)
-                            keysPosition.put(key.getLabel().charAt(0), new Cell(i, j));
-                        rowKeys.add(key);
+//                if (i == 0)
+//                    cols = 3; //todo mod was 7
+                for (int j = 0; j < cols; ++j) {
+                    Keyboard.Key k = keyboard.getKeys().get(getKeyIndex(new Cell(w, j)));
+                    Key key = new Key(k.codes[0], k.label.toString(), k.icon);
+                    if(key.getLabel().length()>0)
+                        keysPosition.put(key.getLabel().charAt(0), new Cell(i, j));
+                    rowKeys.add(key);
                 }
                 w++;
                 this.keys.put(i, rowKeys);
@@ -64,15 +64,19 @@ public class KeysController {
         return keys.get(position.getRow()).get(position.getCol());
     }
 
+    public String getLabelAtPosition(Cell position){
+        return keys.get(position.getRow()).get(position.getCol()).getLabel();
+    }
+
     public ArrayList<Key> getKeysAtRow(int row){
         return keys.get(row);
     }
 
     /*******************MODIFY KEYS********************/
 
-    public void modifyKeyAtPosition(Cell position, int code, String label){
+    public void modifyKeyAtPosition(Cell position, String label){
         if(position.isValidPosition()){
-            getKeyAtPosition(position).setCode(code);
+//            getKeyAtPosition(position).setCode(code);
             getKeyAtPosition(position).setLabel(label);
         }
     }

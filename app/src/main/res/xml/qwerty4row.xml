@@ -9,19 +9,18 @@
         <Key android:codes="2001" android:keyLabel="" />
         <Key android:codes="2002" android:keyLabel="" />
         <Key android:codes="2003" android:keyLabel="" />
-        <Key android:codes="0" android:keyLabel="qaz"  />
-        <Key android:codes="1" android:keyLabel="wsx" />
-        <Key android:codes="2" android:keyLabel="edc" />
-        <Key android:codes="3" android:keyLabel="rfv" />
-        <Key android:codes="4" android:keyLabel="tgb" />
-        <Key android:codes="5" android:keyLabel="yhn" />
-        <Key android:codes="6" android:keyLabel="ujm" />
-        <Key android:codes="7" android:keyLabel="ik," />
-        <Key android:codes="8" android:keyLabel="ol." />
-        <Key android:codes="9" android:keyLabel="p;/" />
+        <Key android:codes="0" android:keyLabel="qazw"/>
+        <Key android:codes="1" android:keyLabel="sxed" />
+        <Key android:codes="2" android:keyLabel="crfv" />
+        <Key android:codes="3" android:keyLabel="tgby"  />
+        <Key android:codes="4" android:keyLabel="hnuj" />
+        <Key android:codes="5" android:keyLabel="miko" />
+        <Key android:codes="6" android:keyLabel="pl,." />
+        <Key android:codes="7" android:keyLabel=";/?!"/>
         <Key android:codes="1001" android:keyLabel=" " />
         <Key android:codes="1002" android:keyLabel="back" />
         <Key android:codes="1003" android:keyLabel="enter" />
+
         <Key android:codes="-1" android:keyLabel="" />
         <Key android:codes="-1" android:keyLabel="" />
     </Row>
