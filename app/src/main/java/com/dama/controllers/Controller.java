@@ -5,12 +5,15 @@ import android.inputmethodservice.Keyboard;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.FrameLayout;
+
+import androidx.annotation.ColorInt;
+
 import com.dama.customkeyboardbase.R;
 
 import com.dama.utils.Cell;
 
 public class Controller {
-    public static final int COLS = 16;
+    public static int COLS = 16;
     public static final int ROWS = 1;
     public static final int INVALID_KEY = -1;
     public static final int HIDDEN_KEY = -3;
@@ -23,10 +26,14 @@ public class Controller {
     private ViewsController viewsController;
 
     public Controller(Context context, FrameLayout rootView, int version) {
-        if(version == 3)
+        if(version == 3) {
             keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
-        else
+            COLS = 16;
+        }
+        else{
             keysController = new KeysController(new Keyboard(context, R.xml.qwerty4row));
+            COLS = 16;
+        }
         //keysController = new KeysController(new Keyboard(context, R.xml.abc));
         focusController = new FocusController();
         focusController.setCurrentFocus(new Cell(0,3)); //q
@@ -117,5 +124,11 @@ public class Controller {
     }
     public String getLabelAtPosition(Cell position){
         return keysController.getLabelAtPosition(position);
+    }
+
+    public void modifyKeyBackgroundColor(Cell position, @ColorInt int color){
+        viewsController.setBackgroundColor(position, color);
+//        keysController.modifyKeyAtPosition(position, label);
+//        viewsController.modifyKeyLabel(position, label);
     }
 }

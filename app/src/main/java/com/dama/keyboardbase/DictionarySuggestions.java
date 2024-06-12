@@ -1,6 +1,7 @@
 package com.dama.keyboardbase;
 
 import android.content.res.Resources;
+import android.util.Log;
 
 import com.dama.customkeyboardbase.R;
 
@@ -21,9 +22,18 @@ public class DictionarySuggestions {
 
     public void updateSuggestions(String word) {
         // Simple static suggestion example, replace with dynamic logic
+
         String[] new_suggestions = findSuggestions(word);
-        if(new_suggestions.length >= 3)
+        Log.d("DictionarySuggestions", String.valueOf(new_suggestions.length));
+        if(new_suggestions.length == 0)
+            suggestions = new String[]{"", "", ""};
+        else if(new_suggestions.length == 1)
+            suggestions = new String[]{new_suggestions[0], "", ""};
+        else if(new_suggestions.length == 2)
+            suggestions = new String[]{new_suggestions[0], new_suggestions[1], ""};
+        else
             suggestions = new_suggestions;
+        Log.d("DictionarySuggestions", Arrays.toString(suggestions));
     }
 
     private String[] findSuggestions(String input) {
@@ -31,6 +41,11 @@ public class DictionarySuggestions {
         int maxDistance = 1; // max Levenshteina
 
         for (String word : dictionary) {
+            if(input.length() > word.length())
+                continue;
+            if(word.length() - input.length() > 1)
+                continue;
+
             int distance = calculateLevenshteinDistance(input, word);
             if (distance <= maxDistance) {
                 results.add(word);

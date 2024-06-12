@@ -1,6 +1,9 @@
 package com.dama.controllers;
 
 import android.widget.FrameLayout;
+
+import androidx.annotation.ColorInt;
+
 import com.dama.customkeyboardbase.R;
 
 import com.dama.utils.Cell;
@@ -46,6 +49,9 @@ public class ViewsController {
             finaLabel = label;
 
         keyboardView.getKeyViewAtCell(position).changeLabel(finaLabel, "#FBFBFB");
+    }
+    public void setBackgroundColor(Cell position, @ColorInt int color){
+        keyboardView.getKeyViewAtCell(position).setBackgroundColor(color);
     }
 
     public void removeKeyboard(){

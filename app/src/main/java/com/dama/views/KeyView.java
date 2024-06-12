@@ -13,6 +13,8 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.TableRow;
+
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import com.dama.controllers.Controller;
 import com.dama.customkeyboardbase.R;

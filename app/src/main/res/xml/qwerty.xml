@@ -19,9 +19,9 @@
         <Key android:codes="7" android:keyLabel="ik," />
         <Key android:codes="8" android:keyLabel="ol." />
         <Key android:codes="9" android:keyLabel="p;/" />
-        <Key android:codes="1001" android:keyLabel=" " />
+        <Key android:codes="1001" android:keyLabel="␣" />
         <Key android:codes="1002" android:keyLabel="back" />
-        <Key android:codes="1003" android:keyLabel="enter" />
+        <Key android:codes="1003" android:keyLabel="hide" />
         <Key android:codes="-1" android:keyLabel="" />
         <Key android:codes="-1" android:keyLabel="" />
     </Row>

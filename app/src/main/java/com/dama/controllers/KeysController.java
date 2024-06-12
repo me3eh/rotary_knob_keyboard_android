@@ -2,6 +2,7 @@ package com.dama.controllers;
 
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard;
+import android.util.Log;
 
 import com.dama.utils.Cell;
 import com.dama.utils.Key;
@@ -61,6 +62,9 @@ public class KeysController {
     }
 
     public Key getKeyAtPosition(Cell position){
+        Log.d("czeka", String.valueOf(keys));
+        Log.d("czeka", String.valueOf(position.getRow()));
+        Log.d("czeka", String.valueOf(position.getCol()));
         return keys.get(position.getRow()).get(position.getCol());
     }
 

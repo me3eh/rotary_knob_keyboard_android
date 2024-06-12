@@ -8,17 +8,22 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="Keyboard base Qwerty - Abc"
+        android:label="KNOB KEYBOARD POLSKA GUROM"
         android:supportsRtl="true"
         android:theme="@style/Theme.KeyboardBase">
         <service
             android:name="com.dama.keyboardbase.KeyboardImeService"
-            android:label="Keyboard base Qwerty - Abc"
+            android:label="KNOB KEYBOARD POLSKA GUROM"
             android:permission="android.permission.BIND_INPUT_METHOD"
             android:exported="true">
             <intent-filter>

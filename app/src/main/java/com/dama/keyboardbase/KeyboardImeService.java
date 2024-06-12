@@ -1,11 +1,15 @@
 package com.dama.keyboardbase;
 
+import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.inputmethodservice.InputMethodService;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -33,6 +37,8 @@ import java.util.Scanner;
 public class KeyboardImeService extends InputMethodService {
     private boolean previousKeyEnter = false;
     private int KEYBOARD_VERSION = 4;
+    private int SPACE_INDEX = 11;
+//    private int SPACE_INDEX_3 = 13;
     private Controller controller;
     private DictionarySuggestions dictionarySuggestions;
     private boolean keyboardShown;
@@ -42,34 +48,36 @@ public class KeyboardImeService extends InputMethodService {
     private Cell hint1 = new Cell(0, 0);
     private Cell hint2 = new Cell(0, 1);
     private Cell hint3 = new Cell(0, 2);
+    private Cell space_button = new Cell(0, SPACE_INDEX);
     private JavaServer js;
-
-
+    Thread thread;
+    Thread changeColor;
 
     @Override
     public View onCreateInputView() {
         try {
-            js = new JavaServer();
+            js = new JavaServer(this);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
         controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
         controller.drawKeyboard();
-
+//        Color myWhite = new Color(255, 255, 254);
         temaImeLogger = new TemaImeLogger(getApplicationContext());
         dictionarySuggestions = new DictionarySuggestions(getResources());
         Log.d("poszlo", "start");
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Log.d("poszlo", "less go");
-                    js.run_method();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        Log.d("poszlo", "nowy_thread");
+        Log.d("poszlo", String.valueOf(thread));
+
+//        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//        String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
+//        WifiManager.MulticastLock lock = wifiManager.createMulticastLock("Log_Tag");
+//        lock.acquire();
+
+//        Log.d("poszlo", "ip_address" + ipAddress);
         return rootView;
     }
 
@@ -78,6 +86,19 @@ public class KeyboardImeService extends InputMethodService {
         super.onStartInputView(info, restarting);
         previousKeyEnter = false;
         keyboardShown = true;
+        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
+
+        thread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Log.d("poszlo", "less go");
+                    js.run_method();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        thread.start();
     }
 
     @Override
@@ -85,6 +106,7 @@ public class KeyboardImeService extends InputMethodService {
         super.onFinishInputView(finishingInput);
         keyboardShown = false;
         ic = null;
+        thread.interrupt();
     }
 
     @Override
@@ -93,59 +115,14 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode2, KeyEvent event) {
-        int keyCode = keyCode2;
-        Log.d("klawisz nacisniety", String.valueOf(keyCode2));
-//        int keyCode = keyCode2;
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyboardShown){
-            Log.d("klawisz", String.valueOf(keyCode));
-            if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
-                keyCode = KeyEvent.KEYCODE_DPAD_RIGHT;
-            else if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-                keyCode = KeyEvent.KEYCODE_DPAD_LEFT;
-            }
-            else if(keyCode == KeyEvent.KEYCODE_VOLUME_MUTE)
-                keyCode = KeyEvent.KEYCODE_DPAD_CENTER;
-            Log.d("zmieniony klawisz", String.valueOf(keyCode));
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
             DatagramPacket sendPacket;
-            byte[] sendData;
-            // Create a Datagram Socket
-            DatagramSocket clientSocket = null;
-            try {
-                clientSocket = new DatagramSocket();
-            } catch (SocketException e) {
-                throw new RuntimeException(e);
-            }
-            // Set client timeout to be 1 second
-            try {
-                clientSocket.setSoTimeout(1000);
-            } catch (SocketException e) {
-                throw new RuntimeException(e);
-            }
-            String cmd = "1";
-            // If client types quit, close the socket and exit
-            if (cmd.equals("QUIT")) {
-                clientSocket.close();
-                System.exit(1);
-            }
-            sendData = cmd.getBytes();
-            try {
-                sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName("127.0.0.1"), 5001);
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
-            Log.d("sendPacket", sendPacket.toString());
-            try {
-                clientSocket.send(sendPacket);
-                Log.d("sendPacket", cmd);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
 
             ic = getCurrentInputConnection();
-            if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT){
+            if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_DPAD_LEFT){
                 if(previousKeyEnter)
                     hideKeyboard();
             }
@@ -158,7 +135,16 @@ public class KeyboardImeService extends InputMethodService {
                     break;
                 case KeyEvent.KEYCODE_BACK:
                     hideKeyboard();
-                    KEYBOARD_VERSION = KEYBOARD_VERSION == 3 ? 4 : 3;
+                    if(KEYBOARD_VERSION == 3) {
+                        KEYBOARD_VERSION = 4;
+                        space_button = new Cell(0, 11);
+                    }
+                    else {
+                        KEYBOARD_VERSION = 3;
+                        space_button = new Cell(0, 13);
+                    }
+//                    KEYBOARD_VERSION = KEYBOARD_VERSION == 3 ? 4 : 3;
+//                    SPACE_INDEX = KEYBOARD_VERSION == 3 ? 13 : 11;
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
                     controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
                     controller.drawKeyboard();
@@ -257,31 +243,37 @@ public class KeyboardImeService extends InputMethodService {
         if (code == 1002){
             ic.deleteSurroundingText(1, 0);
             wholeWord = removeLastChar(wholeWord);
+            setSpaceButtonToBlack();
 //            updateSuggestions(wholeWord);
             return;
         }
         if (code == 1003){
+            setSpaceButtonToBlack();
             previousKeyEnter = true;
             return;
         }
         if (code == 1001){
+            setSpaceButtonToBlack();
             ic.commitText(String.valueOf(' '),1);
             wholeWord = "";
             return;
         }
         if (code == 2001) {
+            setSpaceButtonToBlack();
             String value = controller.getLabelAtPosition(hint1);
             commitSuggestion(value);
             emptySuggestions();
             return;
         }
         if (code == 2002) {
+            setSpaceButtonToBlack();
             String value = controller.getLabelAtPosition(hint2);
             commitSuggestion(value);
             emptySuggestions();
             return;
         }
         if (code == 2003) {
+            setSpaceButtonToBlack();
             String value = controller.getLabelAtPosition(hint3);
             commitSuggestion(value);
             emptySuggestions();
@@ -309,6 +301,21 @@ public class KeyboardImeService extends InputMethodService {
         // Odczytaj wprowadzoną literę
 //        char keyChar = charSequence.charAt(0);
         ic.commitText(String.valueOf(key),1);
+        if(thread.isAlive())
+            thread.interrupt();
+        thread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    controller.modifyKeyBackgroundColor(space_button, Color.RED);
+                    Thread.sleep(2 * 1000);
+                    controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
+                }catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+                    Log.d("poszlo", "zatrzymano proces");
+                }
+            }
+        });
+        thread.start();
         dictionarySuggestions.updateSuggestions(wholeWord);
         String[] suggestions = dictionarySuggestions.getSuggestions();
         controller.modifyKeyContent(hint1, suggestions[0]);
@@ -316,7 +323,11 @@ public class KeyboardImeService extends InputMethodService {
         controller.modifyKeyContent(hint3, suggestions[2]);
     }
 
-
+    public void setSpaceButtonToBlack(){
+        if(thread.isAlive())
+            thread.interrupt();
+        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
+    }
     private void commitSuggestion(String suggestion) {
         InputConnection inputConnection = getCurrentInputConnection();
         if (inputConnection != null) {
