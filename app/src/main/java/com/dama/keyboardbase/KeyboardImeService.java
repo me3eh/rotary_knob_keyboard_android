@@ -50,12 +50,17 @@ public class KeyboardImeService extends InputMethodService {
 //    private Cell hint2 = new Cell(0, 1);
 //    private Cell hint3 = new Cell(0, 2);
 //    private Cell space_button = new Cell(0, SPACE_INDEX);
+//    private boolean
     boolean flag = false;
 
     boolean flag2 = false;
     private JavaServer js;
     Thread thread;
     Thread threadLongPress;
+    List<String> suggestions = new ArrayList<String>();
+    private int page = 0;
+    private String wholeWord = "";
+
 //    Thread changeColor;
 
     @Override
@@ -79,7 +84,7 @@ public class KeyboardImeService extends InputMethodService {
         thread = new Thread(new Runnable() {
             public void run() {
                 try {
-                    Log.d("poszlo", "less go");
+                    Log.d("ruszyla maszyna", "less go");
                     js.run_method();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -96,9 +101,6 @@ public class KeyboardImeService extends InputMethodService {
         super.onStartInputView(info, restarting);
         previousKeyEnter = false;
         keyboardShown = true;
-        Log.d("czeka", "papa");
-//        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
-
     }
 
     @Override
@@ -106,7 +108,8 @@ public class KeyboardImeService extends InputMethodService {
         super.onFinishInputView(finishingInput);
         keyboardShown = false;
         ic = null;
-
+        wholeWord = "";
+        page = 1;
     }
 
     @Override
@@ -146,14 +149,6 @@ public class KeyboardImeService extends InputMethodService {
         }
 
         return super.onKeyUp(keyCode, event);
-//        if(keyboardShown) {
-//            longPress = false;
-//            if (threadLongPress != null)
-//                if (threadLongPress.isAlive())
-//                    threadLongPress.interrupt();
-//            return true;
-//        }
-//        return super.onKeyUp(keyCode, event);
     }
 
     @Override
@@ -194,7 +189,6 @@ public class KeyboardImeService extends InputMethodService {
                 case KeyEvent.KEYCODE_1:
                     Log.d("MOD 1 QWERTY","selected");
                     KEYBOARD_VERSION = 4;
-//                    space_button = new Cell(0, 11);
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
                     controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
                     controller.drawKeyboard();
@@ -203,7 +197,6 @@ public class KeyboardImeService extends InputMethodService {
                 case KeyEvent.KEYCODE_2:
                     Log.d("MOD 2 ABC","selected");
                     KEYBOARD_VERSION = 3;
-//                    space_button = new Cell(0, 13);
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
                     controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
                     controller.drawKeyboard();
@@ -219,9 +212,7 @@ public class KeyboardImeService extends InputMethodService {
                         KEYBOARD_VERSION = 3;
                     }
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
-//                    Log.d("ilosc kolumn przed kontrolerem:", String.valueOf(controller.COLS));
                     controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
-                    Log.d("ilosc kolumn:", String.valueOf(controller.COLS));
 
                     controller.drawKeyboard();
                     setInputView(rootView);
@@ -236,11 +227,34 @@ public class KeyboardImeService extends InputMethodService {
                     if(keyCode == KeyEvent.KEYCODE_DPAD_DOWN){
                         temaImeLogger.writeToLog("DOWN",false);
                     }
+                    Cell focus = controller.getFocusController_().getCurrentFocus();
                     Cell newCell = controller.findNewFocus(keyCode);
+                    Log.d("aktualna pozycja", String.valueOf(focus));
+                    Log.d("nastepna pozycja", String.valueOf(newCell));
+
                     if (controller.isNextFocusable(newCell)){
                         //update focus
                         controller.getFocusController_().setCurrentFocus(newCell);
                         controller.moveFocusOnKeyboard(newCell);
+                    }
+                    if(suggestions.size() > (Controller.COLS * page) &&
+                            focus.getRow() == 0 &&
+                            focus.getCol() == Controller.COLS - 1 &&
+                            keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                        page += 1;
+                        updateSuggestions(suggestions, page);
+                        Cell beginningOfHints = new Cell(0, 0);
+                        controller.getFocusController_().setCurrentFocus(beginningOfHints);
+                        controller.moveFocusOnKeyboard(beginningOfHints);
+                    }
+                    else if(page > 1 && focus.getRow() == 0 &&
+                            focus.getCol() == 0 &&
+                            keyCode == KeyEvent.KEYCODE_DPAD_LEFT){
+                        page -= 1;
+                        updateSuggestions(suggestions, page);
+                        Cell endOfHints = new Cell(0, Controller.COLS - 1);
+                        controller.getFocusController_().setCurrentFocus(endOfHints);
+                        controller.moveFocusOnKeyboard(endOfHints);
                     }
                     break;
             }
@@ -288,23 +302,8 @@ public class KeyboardImeService extends InputMethodService {
         }
     }
 
-    String wholeWord = "";
-    int howManyTimesStroked = 0;
-
-    int valueOfpreviousKey = 0;
-    int timesPreviousKey = -1;
-    public int msElapsed;
-    public boolean isRunning = false;
-    long base_time = 0;
-    long difference_in_time = 0;
 
     public void onText(int code) {
-        Log.d("dalej", "w funkcji");
-//        InputConnection inputConnection = getCurrentInputConnection();
-//        if (ic == null){
-//            return;
-//        }
-
         if(code >= 4000 && code <= 4014){
             Cell hint = new Cell(0, code - 4000);
             String value = controller.getLabelAtPosition(hint);
@@ -312,41 +311,33 @@ public class KeyboardImeService extends InputMethodService {
             Cell newCell = new Cell(1, 0);
             controller.getFocusController_().setCurrentFocus(newCell);
             controller.moveFocusOnKeyboard(newCell);
+
+            wholeWord = "";
+            page = 1;
             emptySuggestions();
             return;
         }
         if (code == 1002){
             wholeWord = removeLastChar(wholeWord);
-            List<String> suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
-            updateSuggestions(suggestions);
+            suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+            updateSuggestions(suggestions, 1);
+            page = 1;
             return;
         }
         if (code == 1003){
-            setSpaceButtonToBlack();
             previousKeyEnter = true;
             return;
         }
         if (code == 1001){
-            setSpaceButtonToBlack();
             ic.commitText(String.valueOf(' '),1);
             wholeWord = "";
+            page = 1;
             return;
         }
-//        difference_in_time = (int)(SystemClock.elapsedRealtime() - base_time);
-//        base_time = SystemClock.elapsedRealtime();
-//        if(code == valueOfpreviousKey && ((difference_in_time / 1000) < 2) ){
-//            timesPreviousKey += 1;
-//            timesPreviousKey = timesPreviousKey % KEYBOARD_VERSION;
-//            ic.deleteSurroundingText(1, 0);
-//            wholeWord = removeLastChar(wholeWord);
-//        }
-//        else{
-//            timesPreviousKey = 0;
-//            valueOfpreviousKey = code;
-//        }
+
         wholeWord += code;
-        List<String> suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
-        updateSuggestions(suggestions);
+        suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+        updateSuggestions(suggestions, 1);
     }
 
     public void emptySuggestions(){
@@ -361,30 +352,27 @@ public class KeyboardImeService extends InputMethodService {
         }
     }
 
-    public void updateSuggestions(List<String> suggestions){
-        int max = 12;
-        int maxWordInRow = 12;
-        if(KEYBOARD_VERSION ==4){
-            max = 10;
-            maxWordInRow = 10;
-        }
+    public void updateSuggestions(List<String> suggestions, int page){
+        int max = Controller.COLS;
+        int maxWordInRow = Controller.COLS;
+        int previousSuggestionRange = (page - 1) * maxWordInRow;
+        int suggestionRange = page * maxWordInRow;
+//        max = page * maxWordInRow;
+        Log.d("miedzy", previousSuggestionRange + " " + suggestionRange);
+        if(suggestions.size() < suggestionRange && suggestions.size() >= previousSuggestionRange)
+            max = suggestions.size() - previousSuggestionRange;
+        Log.d("miedzy max", String.valueOf(max));
 
-        if(suggestions.size() < max)
-            max = suggestions.size();
         for(int i = 0; i < max; i++) {
             Cell hintCell = new Cell(0, i);
-            controller.modifyKeyContent(hintCell, suggestions.get(i));
+            controller.modifyKeyContent(hintCell, suggestions.get(i + previousSuggestionRange));
         }
         for(int i = max; i < maxWordInRow; ++i){
             Cell hintCell = new Cell(0, i);
             controller.modifyKeyContent(hintCell, "");
         }
     }
-    public void setSpaceButtonToBlack(){
-//        if(thread.isAlive())
-//            thread.interrupt();
-//        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
-    }
+
     private void commitSuggestion(String suggestion) {
         InputConnection inputConnection = getCurrentInputConnection();
         if (inputConnection != null) {

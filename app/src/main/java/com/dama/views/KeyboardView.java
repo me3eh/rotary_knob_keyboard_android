@@ -77,7 +77,6 @@ public class KeyboardView  extends TableLayout {
                 }else {
                     background = keyDrawable;
                 }
-                Log.d("heh, zapomnialem", keys.get(j).getLabel());
                 KeyView kv = new KeyView(getContext(), background, keys.get(j).getLabel(), colorLabel);
                 if(keys.get(j).getIcon()!=null)
                     kv.setIcon(keys.get(j).getIcon());

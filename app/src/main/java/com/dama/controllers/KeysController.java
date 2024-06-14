@@ -45,9 +45,6 @@ public class KeysController {
 
     private int getKeyIndex(Cell cell){
         int cols = Controller.COLS;
-//        return
-//        if(cell.getRow() == 1)
-//            cols = 1;
 
         return ((cell.getRow()*cols))+cell.getCol();
     }
