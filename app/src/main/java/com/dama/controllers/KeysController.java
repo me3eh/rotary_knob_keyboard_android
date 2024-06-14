@@ -8,6 +8,7 @@ import com.dama.utils.Cell;
 import com.dama.utils.Key;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class KeysController {
@@ -25,12 +26,19 @@ public class KeysController {
 
     private void loadKeys(Keyboard keyboard){
         if(keys.size()==0){
-            int cols = Controller.COLS;
+            int cols;
             for(int i=0, w=0; i<Controller.ROWS; ++i) {
                 ArrayList<Key> rowKeys = new ArrayList<>();
 //                if (i == 0)
-//                    cols = 3; //todo mod was 7
+//                    cols = 1; //todo mod was 7
+//                else
+                cols = Controller.COLS;
+//                Log.d("klawisz", String.valueOf(cols));
+//                Log.d("klawisz", String.valueOf(i));
                 for (int j = 0; j < cols; ++j) {
+//                    Keyboard.Key k = keyboard.getKeys().get(j);
+//                    Log.d("klawisz", String.valueOf(k.codes));
+//                    Log.d("klawisz", String.valueOf(getKeyIndex(new Cell(w, j))));
                     Keyboard.Key k = keyboard.getKeys().get(getKeyIndex(new Cell(w, j)));
                     Key key = new Key(k.codes[0], k.label.toString(), k.icon);
                     if(key.getLabel().length()>0)
@@ -44,7 +52,13 @@ public class KeysController {
     }
 
     private int getKeyIndex(Cell cell){
-        return ((cell.getRow()*Controller.COLS))+cell.getCol();
+        int cols = Controller.COLS;
+        Log.d("dupa", String.valueOf(cell.getRow()));
+//        return
+//        if(cell.getRow() == 1)
+//            cols = 1;
+
+        return ((cell.getRow()*cols))+cell.getCol();
     }
 
     public void addKeyPosition(char character, Cell position){
@@ -62,9 +76,6 @@ public class KeysController {
     }
 
     public Key getKeyAtPosition(Cell position){
-        Log.d("czeka", String.valueOf(keys));
-        Log.d("czeka", String.valueOf(position.getRow()));
-        Log.d("czeka", String.valueOf(position.getCol()));
         return keys.get(position.getRow()).get(position.getCol());
     }
 

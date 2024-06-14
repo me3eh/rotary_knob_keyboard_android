@@ -45,13 +45,18 @@ public class KeyboardImeService extends InputMethodService {
     private InputConnection ic;
     private FrameLayout rootView;
     private TemaImeLogger temaImeLogger;
-    private Cell hint1 = new Cell(0, 0);
-    private Cell hint2 = new Cell(0, 1);
-    private Cell hint3 = new Cell(0, 2);
-    private Cell space_button = new Cell(0, SPACE_INDEX);
+    private boolean longPress = false;
+//    private Cell hint1 = new Cell(0, 0);
+//    private Cell hint2 = new Cell(0, 1);
+//    private Cell hint3 = new Cell(0, 2);
+//    private Cell space_button = new Cell(0, SPACE_INDEX);
+    boolean flag = false;
+
+    boolean flag2 = false;
     private JavaServer js;
     Thread thread;
-    Thread changeColor;
+    Thread threadLongPress;
+//    Thread changeColor;
 
     @Override
     public View onCreateInputView() {
@@ -66,28 +71,11 @@ public class KeyboardImeService extends InputMethodService {
 //        Color myWhite = new Color(255, 255, 254);
         temaImeLogger = new TemaImeLogger(getApplicationContext());
         dictionarySuggestions = new DictionarySuggestions(getResources());
-        Log.d("poszlo", "start");
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        Log.d("poszlo", "nowy_thread");
-        Log.d("poszlo", String.valueOf(thread));
-
-//        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-//        String ipAddress = Formatter.formatIpAddress(wifiManager.getConnectionInfo().getIpAddress());
-//        WifiManager.MulticastLock lock = wifiManager.createMulticastLock("Log_Tag");
-//        lock.acquire();
-
-//        Log.d("poszlo", "ip_address" + ipAddress);
-        return rootView;
-    }
-
-    @Override
-    public void onStartInputView(EditorInfo info, boolean restarting) {
-        super.onStartInputView(info, restarting);
-        previousKeyEnter = false;
-        keyboardShown = true;
-        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
-
+        if (thread != null)
+            if (thread.isAlive())
+                thread.interrupt();
         thread = new Thread(new Runnable() {
             public void run() {
                 try {
@@ -99,6 +87,18 @@ public class KeyboardImeService extends InputMethodService {
             }
         });
         thread.start();
+
+        return rootView;
+    }
+
+    @Override
+    public void onStartInputView(EditorInfo info, boolean restarting) {
+        super.onStartInputView(info, restarting);
+        previousKeyEnter = false;
+        keyboardShown = true;
+        Log.d("czeka", "papa");
+//        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
+
     }
 
     @Override
@@ -106,7 +106,7 @@ public class KeyboardImeService extends InputMethodService {
         super.onFinishInputView(finishingInput);
         keyboardShown = false;
         ic = null;
-        thread.interrupt();
+
     }
 
     @Override
@@ -115,38 +115,112 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            Log.d("Test", "Long press!");
+            Cell focus = controller.getFocusController_().getCurrentFocus();
+            int row = 0;
+            if(focus.getRow() == 0)
+                row = 1;
+            Cell newCell = new Cell(row, 0);
+
+            controller.getFocusController_().setCurrentFocus(newCell);
+            controller.moveFocusOnKeyboard(newCell);
+            flag = false;
+            flag2 = true;
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
+    }
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+
+            event.startTracking();
+            if (flag) {
+                Log.d("Test", "Short");
+                typeOnKeyboard(keyCode, event);
+            }
+            flag = true;
+            flag2 = false;
+            return true;
+        }
+
+        return super.onKeyUp(keyCode, event);
+//        if(keyboardShown) {
+//            longPress = false;
+//            if (threadLongPress != null)
+//                if (threadLongPress.isAlive())
+//                    threadLongPress.interrupt();
+//            return true;
+//        }
+//        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            event.startTracking();
+            if (flag2 == true) {
+                flag = false;
+            } else {
+                flag = true;
+                flag2 = false;
+            }
+
+            return true;
+        }
+        steerOnKeyboard(keyCode, event);
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public boolean steerOnKeyboard(int keyCode, KeyEvent event){
         if(keyboardShown){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-            DatagramPacket sendPacket;
-
             ic = getCurrentInputConnection();
+
             if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_DPAD_LEFT){
                 if(previousKeyEnter)
                     hideKeyboard();
             }
+            Log.d("dupa", String.valueOf(keyCode));
+            Log.d("dupa", String.valueOf(KeyEvent.KEYCODE_HOME));
+            Log.d("dupa", String.valueOf(KeyEvent.KEYCODE_MOVE_HOME));
+            Log.d("dupa", String.valueOf(keyCode));
             switch (keyCode){
                 case KeyEvent.KEYCODE_1:
                     Log.d("MOD 1 QWERTY","selected");
+                    KEYBOARD_VERSION = 4;
+//                    space_button = new Cell(0, 11);
+                    rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
+                    controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
+                    controller.drawKeyboard();
+                    setInputView(rootView);
                     break;
                 case KeyEvent.KEYCODE_2:
                     Log.d("MOD 2 ABC","selected");
-                    break;
-                case KeyEvent.KEYCODE_BACK:
-                    hideKeyboard();
-                    if(KEYBOARD_VERSION == 3) {
-                        KEYBOARD_VERSION = 4;
-                        space_button = new Cell(0, 11);
-                    }
-                    else {
-                        KEYBOARD_VERSION = 3;
-                        space_button = new Cell(0, 13);
-                    }
-//                    KEYBOARD_VERSION = KEYBOARD_VERSION == 3 ? 4 : 3;
-//                    SPACE_INDEX = KEYBOARD_VERSION == 3 ? 13 : 11;
+                    KEYBOARD_VERSION = 3;
+//                    space_button = new Cell(0, 13);
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
                     controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
+                    controller.drawKeyboard();
+                    setInputView(rootView);
+
+                    break;
+                case KeyEvent.KEYCODE_BACK:
+
+                    if(KEYBOARD_VERSION == 3){
+                        KEYBOARD_VERSION = 4;
+                    }
+                    else{
+                        KEYBOARD_VERSION = 3;
+                    }
+                    rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
+//                    Log.d("ilosc kolumn przed kontrolerem:", String.valueOf(controller.COLS));
+                    controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
+                    Log.d("ilosc kolumn:", String.valueOf(controller.COLS));
+
                     controller.drawKeyboard();
                     setInputView(rootView);
                     break;
@@ -167,26 +241,32 @@ public class KeyboardImeService extends InputMethodService {
                         controller.moveFocusOnKeyboard(newCell);
                     }
                     break;
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                    Cell focus = controller.getFocusController_().getCurrentFocus();
-                    Key key = controller.getKeysController().getKeyAtPosition(focus);
-
-                    String btn;
-                    if(key.getCode() == Controller.ENTER_KEY)
-                        btn = "INVIO";
-                    else
-                        btn = key.getLabel();
-                    temaImeLogger.writeToLog("CENTER: "+btn,false);
-
-                    int code = key.getCode();
-                    if(code!=Controller.FAKE_KEY){
-                        handleText(code, ic);
-                    }
-                    break;
             }
-            return true;
         }
-        return false;
+        return true;
+    }
+
+    public boolean typeOnKeyboard(int keyCode, KeyEvent event) {
+        Log.d("dalej", String.valueOf(keyboardShown));
+        if (keyboardShown){
+            if(keyCode == KeyEvent.KEYCODE_DPAD_CENTER){
+                Cell focus = controller.getFocusController_().getCurrentFocus();
+                Key key = controller.getKeysController().getKeyAtPosition(focus);
+
+                String btn;
+                if(key.getCode() == Controller.ENTER_KEY)
+                    btn = "INVIO";
+                else
+                    btn = key.getLabel();
+                temaImeLogger.writeToLog("CENTER: "+btn,false);
+
+                int code = key.getCode();
+                if(code!=Controller.FAKE_KEY){
+                    handleText(code, ic);
+                }
+            }
+        }
+        return true;
     }
 
     private void handleText(int code, InputConnection ic){
@@ -233,10 +313,21 @@ public class KeyboardImeService extends InputMethodService {
     public int msElapsed;
     public boolean isRunning = false;
     long base_time = 0;
-    int difference_in_time = 0;
+    long difference_in_time = 0;
     public void onText(int code) {
 //        InputConnection inputConnection = getCurrentInputConnection();
         if (ic == null){
+            return;
+        }
+
+        Log.d("dupa cyckia", String.valueOf(code));
+        if(code >= 4000 && code <= 4014){
+            Cell hint = new Cell(0, code - 4000);
+            String value = controller.getLabelAtPosition(hint);
+            commitSuggestion(value);
+            Cell newCell = new Cell(1, 0);
+            controller.getFocusController_().setCurrentFocus(newCell);
+            controller.moveFocusOnKeyboard(newCell);
             return;
         }
 //        int indexOfKeyboardKey = code;
@@ -258,29 +349,8 @@ public class KeyboardImeService extends InputMethodService {
             wholeWord = "";
             return;
         }
-        if (code == 2001) {
-            setSpaceButtonToBlack();
-            String value = controller.getLabelAtPosition(hint1);
-            commitSuggestion(value);
-            emptySuggestions();
-            return;
-        }
-        if (code == 2002) {
-            setSpaceButtonToBlack();
-            String value = controller.getLabelAtPosition(hint2);
-            commitSuggestion(value);
-            emptySuggestions();
-            return;
-        }
-        if (code == 2003) {
-            setSpaceButtonToBlack();
-            String value = controller.getLabelAtPosition(hint3);
-            commitSuggestion(value);
-            emptySuggestions();
-            return;
-        }
         difference_in_time = (int)(SystemClock.elapsedRealtime() - base_time);
-        base_time = SystemClock.elapsedRealtime() - msElapsed;
+        base_time = SystemClock.elapsedRealtime();
         if(code == valueOfpreviousKey && ((difference_in_time / 1000) < 2) ){
             timesPreviousKey += 1;
             timesPreviousKey = timesPreviousKey % KEYBOARD_VERSION;
@@ -301,47 +371,47 @@ public class KeyboardImeService extends InputMethodService {
         // Odczytaj wprowadzoną literę
 //        char keyChar = charSequence.charAt(0);
         ic.commitText(String.valueOf(key),1);
-        if(thread.isAlive())
-            thread.interrupt();
-        thread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    controller.modifyKeyBackgroundColor(space_button, Color.RED);
-                    Thread.sleep(2 * 1000);
-                    controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
-                }catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-                    Log.d("poszlo", "zatrzymano proces");
-                }
-            }
-        });
-        thread.start();
+//        if(thread.isAlive())
+//            thread.interrupt();
+//        thread = new Thread(new Runnable() {
+//            public void run() {
+//                try {
+//                    controller.modifyKeyBackgroundColor(space_button, Color.RED);
+//                    Thread.sleep(2 * 1000);
+//                    controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
+//                }catch (InterruptedException e) {
+////                    throw new RuntimeException(e);
+//                    Log.d("poszlo", "zatrzymano proces");
+//                }
+//            }
+//        });
+//        thread.start();
         dictionarySuggestions.updateSuggestions(wholeWord);
         String[] suggestions = dictionarySuggestions.getSuggestions();
-        controller.modifyKeyContent(hint1, suggestions[0]);
-        controller.modifyKeyContent(hint2, suggestions[1]);
-        controller.modifyKeyContent(hint3, suggestions[2]);
+//        controller.modifyKeyContent(hint1, suggestions[0]);
+//        controller.modifyKeyContent(hint2, suggestions[1]);
+//        controller.modifyKeyContent(hint3, suggestions[2]);
     }
 
     public void setSpaceButtonToBlack(){
-        if(thread.isAlive())
-            thread.interrupt();
-        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
+//        if(thread.isAlive())
+//            thread.interrupt();
+//        controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
     }
     private void commitSuggestion(String suggestion) {
         InputConnection inputConnection = getCurrentInputConnection();
         if (inputConnection != null) {
-            inputConnection.deleteSurroundingText(wholeWord.length(), 0);
-            wholeWord = "";
+//            inputConnection.deleteSurroundingText(wholeWord.length(), 0);
+//            wholeWord = "";
             inputConnection.commitText(suggestion, 1);
             inputConnection.commitText(" ", 1);
         }
     }
 
     private void emptySuggestions(){
-        controller.modifyKeyContent(hint1, "");
-        controller.modifyKeyContent(hint2, "");
-        controller.modifyKeyContent(hint3, "");
+//        controller.modifyKeyContent(hint1, "");
+//        controller.modifyKeyContent(hint2, "");
+//        controller.modifyKeyContent(hint3, "");
     }
     private String removeLastChar(String str) {
         if(str != null && !str.trim().isEmpty())

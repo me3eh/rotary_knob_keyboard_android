@@ -6,9 +6,26 @@
 <!--        <Key android:codes="1003" android:keyLabel="pojebanie" />-->
 <!--    </Row>-->
     <Row>
-        <Key android:codes="2001" android:keyLabel="" />
-        <Key android:codes="2002" android:keyLabel="" />
-        <Key android:codes="2003" android:keyLabel="" />
+        <Key android:codes="4000" android:keyLabel="dupa"/>
+        <Key android:codes="4001" android:keyLabel="dupa"/>
+        <Key android:codes="4002" android:keyLabel="dupa" />
+        <Key android:codes="4003" android:keyLabel="dupa" />
+        <Key android:codes="4004" android:keyLabel="dupa" />
+        <Key android:codes="4005" android:keyLabel="dupa" />
+        <Key android:codes="4006" android:keyLabel="dupa" />
+        <Key android:codes="4007" android:keyLabel="dupa" />
+        <Key android:codes="4008" android:keyLabel="dupa" />
+        <Key android:codes="4009" android:keyLabel="dupa" />
+        <Key android:codes="4010" android:keyLabel="dupa" />
+        <Key android:codes="4011" android:keyLabel="dupa" />
+        <Key android:codes="4012" android:keyLabel="dupa" />
+        <Key android:codes="4013" android:keyLabel="dupa" />
+    </Row>
+    <Row>
+<!--        <Key android:codes="2001" android:keyLabel="" />-->
+<!--        <Key android:codes="2002" android:keyLabel="" />-->
+<!--        <Key android:codes="2003" android:keyLabel="" />-->
+        <Key android:codes="4000" android:keyLabel="qaz"  />
         <Key android:codes="0" android:keyLabel="qaz"  />
         <Key android:codes="1" android:keyLabel="wsx" />
         <Key android:codes="2" android:keyLabel="edc" />

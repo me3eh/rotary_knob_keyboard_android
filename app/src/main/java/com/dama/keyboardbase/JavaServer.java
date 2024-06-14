@@ -42,8 +42,6 @@ class JavaServer {
 //        server = new DatagramSocket(SERVERPORT, InetAddress.getByName(SERVER_IP));
         server = new DatagramSocket(CLIENTPORT);
         buffer = new byte[2];
-        Log.d("poszlo", "czekam na: " + server.getBroadcast());
-        Log.d("poszlo", String.valueOf(InetAddress.getByName(SERVER_IP)));
         packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(SERVER_IP), SERVERPORT);
 
         while (run) {
