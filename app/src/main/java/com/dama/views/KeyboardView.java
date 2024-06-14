@@ -92,9 +92,6 @@ public class KeyboardView  extends TableLayout {
     }
 
     public KeyView getKeyViewAtCell(Cell cell){
-        Log.d("dupa", "Kolumna w getKeyViewAtCell: " + cell);
-        Log.d("dupa", "rządek: "+ rows);
-        Log.d("dupa", "drugi rządek: "+ rows.keySet());
         return rows.get(cell.getRow()).getKeyView(cell.getCol());
     }
 

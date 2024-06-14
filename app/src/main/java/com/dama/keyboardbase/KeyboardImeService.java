@@ -116,7 +116,7 @@ public class KeyboardImeService extends InputMethodService {
 
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER && keyboardShown) {
             Log.d("Test", "Long press!");
             Cell focus = controller.getFocusController_().getCurrentFocus();
             int row = 0;
@@ -134,8 +134,7 @@ public class KeyboardImeService extends InputMethodService {
     }
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER && keyboardShown) {
             event.startTracking();
             if (flag) {
                 Log.d("Test", "Short");
@@ -159,7 +158,7 @@ public class KeyboardImeService extends InputMethodService {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER && keyboardShown) {
             event.startTracking();
             if (flag2 == true) {
                 flag = false;
@@ -170,7 +169,14 @@ public class KeyboardImeService extends InputMethodService {
 
             return true;
         }
-        steerOnKeyboard(keyCode, event);
+        if(keyboardShown) {
+            steerOnKeyboard(keyCode, event);
+            return true;
+        }
+        if (keyboardShown && keyCode == KeyEvent.KEYCODE_BACK){
+            hideKeyboard();
+            return true;
+        }
         return super.onKeyDown(keyCode, event);
     }
 
@@ -184,10 +190,6 @@ public class KeyboardImeService extends InputMethodService {
                 if(previousKeyEnter)
                     hideKeyboard();
             }
-            Log.d("dupa", String.valueOf(keyCode));
-            Log.d("dupa", String.valueOf(KeyEvent.KEYCODE_HOME));
-            Log.d("dupa", String.valueOf(KeyEvent.KEYCODE_MOVE_HOME));
-            Log.d("dupa", String.valueOf(keyCode));
             switch (keyCode){
                 case KeyEvent.KEYCODE_1:
                     Log.d("MOD 1 QWERTY","selected");
@@ -250,6 +252,7 @@ public class KeyboardImeService extends InputMethodService {
         Log.d("dalej", String.valueOf(keyboardShown));
         if (keyboardShown){
             if(keyCode == KeyEvent.KEYCODE_DPAD_CENTER){
+                Log.d("dalej", "nacisnieto");
                 Cell focus = controller.getFocusController_().getCurrentFocus();
                 Key key = controller.getKeysController().getKeyAtPosition(focus);
 
@@ -270,6 +273,8 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     private void handleText(int code, InputConnection ic){
+        Log.d("dalej", String.valueOf(code));
+
         switch (code){
             case Controller.DEL_KEY:
                 ic.deleteSurroundingText(1, 0);
@@ -282,28 +287,6 @@ public class KeyboardImeService extends InputMethodService {
                 onText(code);
         }
     }
-    final char[][] threeRowKeboard = {
-            {'q', 'a', 'z'},
-            {'w', 's', 'x'},
-            {'e', 'd', 'c'},
-            {'r', 'f', 'v'},
-            {'t', 'g', 'b'},
-            {'y', 'h', 'n'},
-            {'u', 'j', 'm'},
-            {'i', 'k', ','},
-            {'o', 'l', '.'},
-            {'p', ';', '/'},
-    };
-    final char[][] fourRowKeboard = {
-            {'q', 'a', 'z', 'w'},
-            {'s', 'x', 'e', 'd'},
-            {'c', 'r', 'f', 'v'},
-            {'t', 'g', 'b', 'y'},
-            {'h', 'n', 'u', 'j'},
-            {'m', 'i', 'k', 'o'},
-            {'p', 'l', ',', '.'},
-            {';', '/', '?', '!'},
-    };
 
     String wholeWord = "";
     int howManyTimesStroked = 0;
@@ -314,13 +297,14 @@ public class KeyboardImeService extends InputMethodService {
     public boolean isRunning = false;
     long base_time = 0;
     long difference_in_time = 0;
-    public void onText(int code) {
-//        InputConnection inputConnection = getCurrentInputConnection();
-        if (ic == null){
-            return;
-        }
 
-        Log.d("dupa cyckia", String.valueOf(code));
+    public void onText(int code) {
+        Log.d("dalej", "w funkcji");
+//        InputConnection inputConnection = getCurrentInputConnection();
+//        if (ic == null){
+//            return;
+//        }
+
         if(code >= 4000 && code <= 4014){
             Cell hint = new Cell(0, code - 4000);
             String value = controller.getLabelAtPosition(hint);
@@ -328,14 +312,13 @@ public class KeyboardImeService extends InputMethodService {
             Cell newCell = new Cell(1, 0);
             controller.getFocusController_().setCurrentFocus(newCell);
             controller.moveFocusOnKeyboard(newCell);
+            emptySuggestions();
             return;
         }
-//        int indexOfKeyboardKey = code;
         if (code == 1002){
-            ic.deleteSurroundingText(1, 0);
             wholeWord = removeLastChar(wholeWord);
-            setSpaceButtonToBlack();
-//            updateSuggestions(wholeWord);
+            List<String> suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+            updateSuggestions(suggestions);
             return;
         }
         if (code == 1003){
@@ -349,50 +332,54 @@ public class KeyboardImeService extends InputMethodService {
             wholeWord = "";
             return;
         }
-        difference_in_time = (int)(SystemClock.elapsedRealtime() - base_time);
-        base_time = SystemClock.elapsedRealtime();
-        if(code == valueOfpreviousKey && ((difference_in_time / 1000) < 2) ){
-            timesPreviousKey += 1;
-            timesPreviousKey = timesPreviousKey % KEYBOARD_VERSION;
-            ic.deleteSurroundingText(1, 0);
-            wholeWord = removeLastChar(wholeWord);
-        }
-        else{
-            timesPreviousKey = 0;
-            valueOfpreviousKey = code;
-        }
-        char key;
-        if(KEYBOARD_VERSION == 3)
-            key = threeRowKeboard[code][timesPreviousKey];
-        else
-            key = fourRowKeboard[code][timesPreviousKey];
-
-        wholeWord += key;
-        // Odczytaj wprowadzoną literę
-//        char keyChar = charSequence.charAt(0);
-        ic.commitText(String.valueOf(key),1);
-//        if(thread.isAlive())
-//            thread.interrupt();
-//        thread = new Thread(new Runnable() {
-//            public void run() {
-//                try {
-//                    controller.modifyKeyBackgroundColor(space_button, Color.RED);
-//                    Thread.sleep(2 * 1000);
-//                    controller.modifyKeyBackgroundColor(space_button, Color.BLACK);
-//                }catch (InterruptedException e) {
-////                    throw new RuntimeException(e);
-//                    Log.d("poszlo", "zatrzymano proces");
-//                }
-//            }
-//        });
-//        thread.start();
-        dictionarySuggestions.updateSuggestions(wholeWord);
-        String[] suggestions = dictionarySuggestions.getSuggestions();
-//        controller.modifyKeyContent(hint1, suggestions[0]);
-//        controller.modifyKeyContent(hint2, suggestions[1]);
-//        controller.modifyKeyContent(hint3, suggestions[2]);
+//        difference_in_time = (int)(SystemClock.elapsedRealtime() - base_time);
+//        base_time = SystemClock.elapsedRealtime();
+//        if(code == valueOfpreviousKey && ((difference_in_time / 1000) < 2) ){
+//            timesPreviousKey += 1;
+//            timesPreviousKey = timesPreviousKey % KEYBOARD_VERSION;
+//            ic.deleteSurroundingText(1, 0);
+//            wholeWord = removeLastChar(wholeWord);
+//        }
+//        else{
+//            timesPreviousKey = 0;
+//            valueOfpreviousKey = code;
+//        }
+        wholeWord += code;
+        List<String> suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+        updateSuggestions(suggestions);
     }
 
+    public void emptySuggestions(){
+        int max = 12;
+        if(KEYBOARD_VERSION ==4){
+            max = 10;
+        }
+
+        for(int i = 0; i < max; i++) {
+            Cell hintCell = new Cell(0, i);
+            controller.modifyKeyContent(hintCell, "");
+        }
+    }
+
+    public void updateSuggestions(List<String> suggestions){
+        int max = 12;
+        int maxWordInRow = 12;
+        if(KEYBOARD_VERSION ==4){
+            max = 10;
+            maxWordInRow = 10;
+        }
+
+        if(suggestions.size() < max)
+            max = suggestions.size();
+        for(int i = 0; i < max; i++) {
+            Cell hintCell = new Cell(0, i);
+            controller.modifyKeyContent(hintCell, suggestions.get(i));
+        }
+        for(int i = max; i < maxWordInRow; ++i){
+            Cell hintCell = new Cell(0, i);
+            controller.modifyKeyContent(hintCell, "");
+        }
+    }
     public void setSpaceButtonToBlack(){
 //        if(thread.isAlive())
 //            thread.interrupt();
@@ -408,11 +395,11 @@ public class KeyboardImeService extends InputMethodService {
         }
     }
 
-    private void emptySuggestions(){
+//    private void emptySuggestions(){
 //        controller.modifyKeyContent(hint1, "");
 //        controller.modifyKeyContent(hint2, "");
 //        controller.modifyKeyContent(hint3, "");
-    }
+//    }
     private String removeLastChar(String str) {
         if(str != null && !str.trim().isEmpty())
             return str.substring(0, str.length() - 1);

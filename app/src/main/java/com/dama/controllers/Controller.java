@@ -13,7 +13,7 @@ import com.dama.customkeyboardbase.R;
 import com.dama.utils.Cell;
 
 public class Controller {
-    public static int COLS = 11;
+    public static int COLS = 10;
     public static final int ROWS = 2;
     public static final int INVALID_KEY = -1;
     public static final int HIDDEN_KEY = -3;
@@ -27,11 +27,11 @@ public class Controller {
 
     public Controller(Context context, FrameLayout rootView, int version) {
         if(version == 3) {
-            COLS = 13;
+            COLS = 12;
             keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
         }
         else{
-            COLS = 11;
+            COLS = 10;
             keysController = new KeysController(new Keyboard(context, R.xml.qwerty4row));
         }
         Log.d("ilosc kolumn w kontrolerze", COLS + "");

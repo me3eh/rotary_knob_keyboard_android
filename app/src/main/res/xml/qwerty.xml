@@ -6,26 +6,23 @@
 <!--        <Key android:codes="1003" android:keyLabel="pojebanie" />-->
 <!--    </Row>-->
     <Row>
-        <Key android:codes="4000" android:keyLabel="dupa"/>
-        <Key android:codes="4001" android:keyLabel="dupa"/>
-        <Key android:codes="4002" android:keyLabel="dupa" />
-        <Key android:codes="4003" android:keyLabel="dupa" />
-        <Key android:codes="4004" android:keyLabel="dupa" />
-        <Key android:codes="4005" android:keyLabel="dupa" />
-        <Key android:codes="4006" android:keyLabel="dupa" />
-        <Key android:codes="4007" android:keyLabel="dupa" />
-        <Key android:codes="4008" android:keyLabel="dupa" />
-        <Key android:codes="4009" android:keyLabel="dupa" />
-        <Key android:codes="4010" android:keyLabel="dupa" />
-        <Key android:codes="4011" android:keyLabel="dupa" />
-        <Key android:codes="4012" android:keyLabel="dupa" />
-        <Key android:codes="4013" android:keyLabel="dupa" />
+        <Key android:codes="4000" android:keyLabel=""/>
+        <Key android:codes="4001" android:keyLabel=""/>
+        <Key android:codes="4002" android:keyLabel="" />
+        <Key android:codes="4003" android:keyLabel="" />
+        <Key android:codes="4004" android:keyLabel="" />
+        <Key android:codes="4005" android:keyLabel="" />
+        <Key android:codes="4006" android:keyLabel="" />
+        <Key android:codes="4007" android:keyLabel="" />
+        <Key android:codes="4008" android:keyLabel="" />
+        <Key android:codes="4009" android:keyLabel="" />
+        <Key android:codes="4010" android:keyLabel="" />
+        <Key android:codes="4011" android:keyLabel="" />
     </Row>
     <Row>
 <!--        <Key android:codes="2001" android:keyLabel="" />-->
 <!--        <Key android:codes="2002" android:keyLabel="" />-->
 <!--        <Key android:codes="2003" android:keyLabel="" />-->
-        <Key android:codes="4000" android:keyLabel="qaz"  />
         <Key android:codes="0" android:keyLabel="qaz"  />
         <Key android:codes="1" android:keyLabel="wsx" />
         <Key android:codes="2" android:keyLabel="edc" />
@@ -34,8 +31,7 @@
         <Key android:codes="5" android:keyLabel="yhn" />
         <Key android:codes="6" android:keyLabel="ujm" />
         <Key android:codes="7" android:keyLabel="ik," />
-        <Key android:codes="8" android:keyLabel="ol." />
-        <Key android:codes="9" android:keyLabel="p;/" />
+        <Key android:codes="8" android:keyLabel="olp" />
         <Key android:codes="1001" android:keyLabel="␣" />
         <Key android:codes="1002" android:keyLabel="back" />
         <Key android:codes="1003" android:keyLabel="hide" />

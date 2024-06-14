@@ -1,80 +1,110 @@
 package com.dama.keyboardbase;
 
 import android.content.res.Resources;
-import android.util.Log;
 
 import com.dama.customkeyboardbase.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DictionarySuggestions {
+    private final TrieNode root;
+    private final Map<Character, String> t9Map_3Row;
+    private final Map<Character, String> t9Map_4Row;
     private List<String> dictionary;
-    String[] suggestions;
-    public DictionarySuggestions(Resources resources){
+    // Constructor
+    public DictionarySuggestions(Resources resources) {
+
+        root = new TrieNode();
         dictionary = Arrays.asList(resources.getStringArray(R.array.dictionary));
+        for(String s : dictionary){
+            addWord(s);
+        }
+        t9Map_3Row = new HashMap<>();
+        t9Map_3Row.put('0', "qaz");
+        t9Map_3Row.put('1', "wsx");
+        t9Map_3Row.put('2', "edc");
+        t9Map_3Row.put('3', "rfv");
+        t9Map_3Row.put('4', "tgb");
+        t9Map_3Row.put('5', "yhn");
+        t9Map_3Row.put('6', "ujm");
+        t9Map_3Row.put('7', "ik");
+        t9Map_3Row.put('8', "olp");
+        t9Map_4Row = new HashMap<>();
+        t9Map_4Row.put('0', "qazw");
+        t9Map_4Row.put('1', "sxed");
+        t9Map_4Row.put('2', "crfv");
+        t9Map_4Row.put('3', "tgby");
+        t9Map_4Row.put('4', "hnuj");
+        t9Map_4Row.put('5', "miko");
+        t9Map_4Row.put('6', "pl");
     }
 
-    public String[] getSuggestions() {
-        return suggestions;
+    // TrieNode class
+    private static class TrieNode {
+        Map<Character, TrieNode> children = new HashMap<>();
+        boolean isEndOfWord = false;
     }
 
-    public void updateSuggestions(String word) {
-        // Simple static suggestion example, replace with dynamic logic
-
-        String[] new_suggestions = findSuggestions(word);
-        Log.d("DictionarySuggestions", String.valueOf(new_suggestions.length));
-        if(new_suggestions.length == 0)
-            suggestions = new String[]{"", "", ""};
-        else if(new_suggestions.length == 1)
-            suggestions = new String[]{new_suggestions[0], "", ""};
-        else if(new_suggestions.length == 2)
-            suggestions = new String[]{new_suggestions[0], new_suggestions[1], ""};
-        else
-            suggestions = new_suggestions;
-        Log.d("DictionarySuggestions", Arrays.toString(suggestions));
+    // Add a word to the dictionary
+    public void addWord(String word) {
+        TrieNode current = root;
+        for (char ch : word.toCharArray()) {
+            current = current.children.computeIfAbsent(ch, c -> new TrieNode());
+        }
+        current.isEndOfWord = true;
     }
 
-    private String[] findSuggestions(String input) {
-        List<String> results = new ArrayList<>();
-        int maxDistance = 1; // max Levenshteina
+    // Get words based on T9 key sequence
+    public List<String> getWords(String digits, int version) {
+        List<String> result = new ArrayList<>();
+        if (digits == null || digits.isEmpty()) return result;
 
-        for (String word : dictionary) {
-            if(input.length() > word.length())
-                continue;
-            if(word.length() - input.length() > 1)
-                continue;
+        findWords(root, digits, 0, new StringBuilder(), result, version);
+        return result;
+    }
 
-            int distance = calculateLevenshteinDistance(input, word);
-            if (distance <= maxDistance) {
-                results.add(word);
+    // Helper method to find words recursively
+    private void findWords(TrieNode node, String digits, int index, StringBuilder currentWord, List<String> result, int version) {
+        Map<Character, String> t9 = t9Map_4Row;
+        if(version == 3)
+            t9 = t9Map_3Row;
+//        if(/version == 3) {
+//        }
+        if (index == digits.length()) {
+            if (node.isEndOfWord) {
+                result.add(currentWord.toString());
             }
-            if (results.size() == 3) {
-                break;
+            return;
+        }
+
+        char digit = digits.charAt(index);
+        if (!t9.containsKey(digit)) return;
+
+        for (char ch : t9.get(digit).toCharArray()) {
+            TrieNode child = node.children.get(ch);
+            if (child != null) {
+                currentWord.append(ch);
+                findWords(child, digits, index + 1, currentWord, result, version);
+                currentWord.deleteCharAt(currentWord.length() - 1); // Backtrack
             }
         }
-
-        return results.toArray(new String[0]);
     }
 
-    private int calculateLevenshteinDistance(String s1, String s2) {
-        int[][] distance = new int[s1.length() + 1][s2.length() + 1];
-
-        for (int i = 0; i <= s1.length(); i++) {
-            distance[i][0] = i;
-        }
-        for (int j = 0; j <= s2.length(); j++) {
-            distance[0][j] = j;
-        }
-
-        for (int i = 1; i <= s1.length(); i++) {
-            for (int j = 1; j <= s2.length(); j++) {
-                int cost = (s1.charAt(i - 1) == s2.charAt(j - 1)) ? 0 : 1;
-                distance[i][j] = Math.min(Math.min(distance[i - 1][j] + 1, distance[i][j - 1] + 1), distance[i - 1][j - 1] + cost);
-            }
-        }
-
-        return distance[s1.length()][s2.length()];
-    }
+    // Main method for testing
+//    public static void main(String[] args) {
+//        T9Dictionary t9Dictionary = new T9Dictionary();
+//        t9Dictionary.addWord("hello");
+//        t9Dictionary.addWord("hi");
+//        t9Dictionary.addWord("tree");
+//        t9Dictionary.addWord("used");
+//
+//        List<String> words = t9Dictionary.getWords("8733");
+//        for (String word : words) {
+//            System.out.println(word); // Output: tree, used
+//        }
+//    }
 }
