@@ -58,7 +58,7 @@ public class KeyboardImeService extends InputMethodService {
     Thread thread;
     Thread threadLongPress;
     List<String> suggestions = new ArrayList<String>();
-    private int page = 0;
+    private int page = 1;
     private String wholeWord = "";
 
 //    Thread changeColor;
@@ -329,9 +329,13 @@ public class KeyboardImeService extends InputMethodService {
             return;
         }
         if (code == 1001){
-            ic.commitText(String.valueOf(' '),1);
+            Cell firstHint = new Cell(0, 0);
+            String value = controller.getLabelAtPosition(firstHint);
+            commitSuggestion(value);
             wholeWord = "";
             page = 1;
+            emptySuggestions();
+
             return;
         }
 
@@ -353,6 +357,7 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     public void updateSuggestions(List<String> suggestions, int page){
+        Log.d("sugestie", String.valueOf(suggestions));
         int max = Controller.COLS;
         int maxWordInRow = Controller.COLS;
         int previousSuggestionRange = (page - 1) * maxWordInRow;
