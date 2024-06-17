@@ -6,6 +6,7 @@
 <!--        <Key android:codes="1003" android:keyLabel="pojebanie" />-->
 <!--    </Row>-->
     <Row>
+        <Key android:codes="3001" android:keyLabel="↓"/>
         <Key android:codes="4000" android:keyLabel=""/>
         <Key android:codes="4001" android:keyLabel=""/>
         <Key android:codes="4002" android:keyLabel="" />
@@ -23,6 +24,7 @@
 <!--        <Key android:codes="2001" android:keyLabel="" />-->
 <!--        <Key android:codes="2002" android:keyLabel="" />-->
 <!--        <Key android:codes="2003" android:keyLabel="" />-->
+        <Key android:codes="3000" android:keyLabel="↑"/>
         <Key android:codes="0" android:keyLabel="qaz"  />
         <Key android:codes="1" android:keyLabel="wsx" />
         <Key android:codes="2" android:keyLabel="edc" />

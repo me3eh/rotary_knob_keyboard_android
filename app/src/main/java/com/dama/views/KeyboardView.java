@@ -31,6 +31,7 @@ public class KeyboardView  extends TableLayout {
         String colorLabel = Utils.colorToString(ContextCompat.getColor(getContext(), R.color.label));
         Drawable keyDrawable = ContextCompat.getDrawable(getContext(), R.drawable.key_background);
         Drawable hintDrawable = ContextCompat.getDrawable(getContext(), R.drawable.hint_background);
+        Drawable firstHintDrawable = ContextCompat.getDrawable(getContext(), R.drawable.first_hint_background);
         Drawable hiddenKeyDrawable = ContextCompat.getDrawable(getContext(), R.drawable.key_hidden_background);
 
         //create rows and bars
@@ -72,7 +73,10 @@ public class KeyboardView  extends TableLayout {
 //            else{
             for(int j=0; j<keys.size(); j++){
                 Drawable background;
-                if(keys.get(j).getCode()>=4000){
+                if(keys.get(j).getCode() == 4000){
+                    background = firstHintDrawable;
+                }
+                else if(keys.get(j).getCode()>=4001){
                     background = hintDrawable;
                 }else {
                     background = keyDrawable;

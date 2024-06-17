@@ -2,7 +2,8 @@
 <resources>
     <color name="background">#030303</color>
     <color name="keys">#191919</color>
-    <color name="hint">#843c54</color>
+    <color name="hint">#79082F</color>
+    <color name="first_hint">#EA1C62</color>
     <color name="label">#FBFBFB</color>
     <color name="bar">#292929</color>
     <color name="cursor">#66FFFFFF</color>

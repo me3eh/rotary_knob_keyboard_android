@@ -61,7 +61,7 @@ public class DictionarySuggestions {
     // Get words based on T9 key sequence
     public List<String> getWords(String digits, int version) {
         List<String> result = new ArrayList<>();
-        if (digits == null || digits.isEmpty()) return result;
+        if (digits == null || digits.isEmpty() || digits.equals("")) return result;
 
         findWords(root, digits, 0, new StringBuilder(), result, version);
         return result;

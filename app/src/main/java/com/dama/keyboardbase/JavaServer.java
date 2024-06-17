@@ -51,13 +51,14 @@ class JavaServer {
                 InetAddress clientAddress = packet.getAddress();
                 int clientPort = packet.getPort();
                 if (message.equals("1")) {
-                    keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_LEFT, new KeyEvent(1 , 1));
+                    keyboard.steerOnKeyboard(KeyEvent.KEYCODE_DPAD_LEFT, new KeyEvent(1 , 1));
+//                    keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_LEFT, new KeyEvent(1 , 1));
                 }
                 else if (message.equals("2")) {
-                    keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT, new KeyEvent(1 , 1));
+                    keyboard.steerOnKeyboard(KeyEvent.KEYCODE_DPAD_RIGHT, new KeyEvent(1 , 1));
                 }
                 if (message.equals("3")) {
-                    keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_CENTER, new KeyEvent(1 , 1));
+                    keyboard.typeOnKeyboard(KeyEvent.KEYCODE_DPAD_CENTER, new KeyEvent(1 , 1));
                 }
                 byte[] response = "Response from server".getBytes();
 

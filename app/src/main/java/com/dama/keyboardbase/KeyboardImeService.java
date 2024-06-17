@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.io.*;
 import java.net.*;
+import java.util.Objects;
 import java.util.Scanner;
 public class KeyboardImeService extends InputMethodService {
     private boolean previousKeyEnter = false;
@@ -305,7 +306,7 @@ public class KeyboardImeService extends InputMethodService {
 
     public void onText(int code) {
         if(code >= 4000 && code <= 4014){
-            Cell hint = new Cell(0, code - 4000);
+            Cell hint = new Cell(0, code - 3999);
             String value = controller.getLabelAtPosition(hint);
             commitSuggestion(value);
             Cell newCell = new Cell(1, 0);
@@ -317,7 +318,15 @@ public class KeyboardImeService extends InputMethodService {
             emptySuggestions();
             return;
         }
+        if(code == 3000 || code == 3001){
+            Cell newCell = new Cell(code - 3000, 0);
+            controller.getFocusController_().setCurrentFocus(newCell);
+            controller.moveFocusOnKeyboard(newCell);
+            return;
+        }
         if (code == 1002){
+            if(Objects.equals(wholeWord, ""))
+                ic.deleteSurroundingText(1, 0);
             wholeWord = removeLastChar(wholeWord);
             suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
             updateSuggestions(suggestions, 1);
@@ -329,7 +338,7 @@ public class KeyboardImeService extends InputMethodService {
             return;
         }
         if (code == 1001){
-            Cell firstHint = new Cell(0, 0);
+            Cell firstHint = new Cell(0, 1);
             String value = controller.getLabelAtPosition(firstHint);
             commitSuggestion(value);
             wholeWord = "";
@@ -345,36 +354,38 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     public void emptySuggestions(){
-        int max = 12;
-        if(KEYBOARD_VERSION ==4){
-            max = 10;
-        }
+        int max = Controller.COLS;
 
-        for(int i = 0; i < max; i++) {
+        for(int i = 1; i < max; i++) {
             Cell hintCell = new Cell(0, i);
             controller.modifyKeyContent(hintCell, "");
         }
     }
 
-    public void updateSuggestions(List<String> suggestions, int page){
+    public void updateSuggestions(List<String> suggestions, int page) {
         Log.d("sugestie", String.valueOf(suggestions));
         int max = Controller.COLS;
-        int maxWordInRow = Controller.COLS;
+        int maxWordInRow = Controller.COLS - 1;
         int previousSuggestionRange = (page - 1) * maxWordInRow;
         int suggestionRange = page * maxWordInRow;
 //        max = page * maxWordInRow;
         Log.d("miedzy", previousSuggestionRange + " " + suggestionRange);
-        if(suggestions.size() < suggestionRange && suggestions.size() >= previousSuggestionRange)
-            max = suggestions.size() - previousSuggestionRange;
+        if (suggestions.size() < suggestionRange && suggestions.size() >= previousSuggestionRange)
+            max = suggestions.size() - previousSuggestionRange + 1;
         Log.d("miedzy max", String.valueOf(max));
 
-        for(int i = 0; i < max; i++) {
-            Cell hintCell = new Cell(0, i);
-            controller.modifyKeyContent(hintCell, suggestions.get(i + previousSuggestionRange));
-        }
-        for(int i = max; i < maxWordInRow; ++i){
-            Cell hintCell = new Cell(0, i);
-            controller.modifyKeyContent(hintCell, "");
+        if (max > 0){
+            for (int i = 1; i < max; i++) {
+                Cell hintCell = new Cell(0, i);
+                controller.modifyKeyContent(hintCell, suggestions.get(i + previousSuggestionRange - 1));
+                Log.d("index", "index: " + String.valueOf(i));
+                Log.d("index", "index in dictionary: " + String.valueOf(i + previousSuggestionRange - 1));
+                Log.d("slowo", "index in dictionary: " + suggestions.get(i + previousSuggestionRange - 1));
+            }
+            for (int i = max; i <= maxWordInRow; ++i) {
+                Cell hintCell = new Cell(0, i);
+                controller.modifyKeyContent(hintCell, "");
+            }
         }
     }
 
