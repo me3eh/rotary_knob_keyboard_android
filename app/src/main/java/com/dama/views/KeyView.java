@@ -96,15 +96,15 @@ public class KeyView extends ImageView {
     public void addKeyParams(int code, boolean isSuggestion){
         TableRow.LayoutParams params = new TableRow.LayoutParams();
         if(code == Controller.SPACE_KEY){
-            params.span = 4; // key gets 4 cells
+            params.span = 1; // key gets 4 cells
             changeDimension(this.keyHeight, ((this.keyWidth*4)+((4+4)*3)), 0);  //4+4(margin left/right)
         }
-        if(isSuggestion){
-            params.gravity = Gravity.CENTER;
-            params.setMargins(0, 4, 0, 4);
-        }else{
-            params.setMargins(4, 4, 4, 4);
-        }
+//        if(isSuggestion){
+        params.gravity = Gravity.CENTER;
+//            params.setMargins(0, 4, 0, 4);
+//        }else{
+        params.setMargins(0, 4, 0, 4);
+//        }
         setLayoutParams(params);
     }
 

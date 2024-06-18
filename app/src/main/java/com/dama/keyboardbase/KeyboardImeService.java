@@ -121,14 +121,6 @@ public class KeyboardImeService extends InputMethodService {
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER && keyboardShown) {
             Log.d("Test", "Long press!");
-            Cell focus = controller.getFocusController_().getCurrentFocus();
-            int row = 0;
-            if(focus.getRow() == 0)
-                row = 1;
-            Cell newCell = new Cell(row, 0);
-
-            controller.getFocusController_().setCurrentFocus(newCell);
-            controller.moveFocusOnKeyboard(newCell);
             flag = false;
             flag2 = true;
             return true;
@@ -172,6 +164,9 @@ public class KeyboardImeService extends InputMethodService {
             hideKeyboard();
             return true;
         }
+        Log.d("steering", String.valueOf(keyCode));
+        Log.d("steering", "keycode: " + String.valueOf(keyCode));
+        Log.d("steering", "event: " + String.valueOf(event));
         return super.onKeyDown(keyCode, event);
     }
 
@@ -187,6 +182,8 @@ public class KeyboardImeService extends InputMethodService {
             }
             switch (keyCode){
                 case KeyEvent.KEYCODE_1:
+                    wholeWord = "";
+                    previousString = "";
                     Log.d("MOD 1 QWERTY","selected");
                     KEYBOARD_VERSION = 4;
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
@@ -196,6 +193,8 @@ public class KeyboardImeService extends InputMethodService {
                     break;
                 case KeyEvent.KEYCODE_2:
                     Log.d("MOD 2 ABC","selected");
+                    wholeWord = "";
+                    previousString = "";
                     KEYBOARD_VERSION = 3;
                     rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
                     controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
@@ -204,18 +203,7 @@ public class KeyboardImeService extends InputMethodService {
 
                     break;
                 case KeyEvent.KEYCODE_BACK:
-
-                    if(KEYBOARD_VERSION == 3){
-                        KEYBOARD_VERSION = 4;
-                    }
-                    else{
-                        KEYBOARD_VERSION = 3;
-                    }
-                    rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
-                    controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
-
-                    controller.drawKeyboard();
-                    setInputView(rootView);
+                    hideKeyboard();
                     break;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     temaImeLogger.writeToLog("LEFT",false);
@@ -324,20 +312,24 @@ public class KeyboardImeService extends InputMethodService {
             return;
         }
         if (code == 1002){
-            if(Objects.equals(wholeWord, ""))
-                ic.deleteSurroundingText(1, 0);
             wholeWord = removeLastChar(wholeWord);
             previousString = removeLastChar(previousString);
-            Log.d("czasami", previousString);
-            suggestionQuery();
-            updateSuggestions(suggestions, 1);
 
-//            suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
-//            updateSuggestions(suggestions, 1);
+            if(Objects.equals(wholeWord, "")) {
+                ic.finishComposingText();
+                ic.deleteSurroundingText(1, 0);
+                emptySuggestions();
+            }
+            else{
+                suggestionQuery();
+                updateSuggestions(suggestions, 1);
+            }
             page = 1;
             return;
         }
         if (code == 1003){
+            wholeWord = "";
+            previousString = "";
             previousKeyEnter = true;
             return;
         }
@@ -425,11 +417,13 @@ public class KeyboardImeService extends InputMethodService {
             }
         }
         else if(max == 1){
+            emptySuggestions();
             Log.d("czasami", "weszlo");
 
             Cell hintCell = new Cell(0, 1);
             controller.modifyKeyContent(hintCell, previousString);
         }
+        ic.setComposingText(previousString, previousString.length());
     }
 
     private void commitSuggestion(String suggestion) {
