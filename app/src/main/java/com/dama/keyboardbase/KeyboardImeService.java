@@ -1,24 +1,18 @@
 package com.dama.keyboardbase;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
+import com.dama.database.DatabaseHelper;
+import com.dama.database.DatabaseManager;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.inputmethodservice.InputMethodService;
-import android.net.wifi.WifiManager;
-import android.os.Handler;
 import android.os.StrictMode;
-import android.os.SystemClock;
-import android.provider.Settings;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
-import android.widget.TextView;
-import android.content.res.Configuration;
 
 import com.dama.controllers.Controller;
 import com.dama.customkeyboardbase.R;
@@ -29,12 +23,9 @@ import com.dama.utils.Key;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.io.*;
-import java.net.*;
 import java.util.Objects;
-import java.util.Scanner;
+
 public class KeyboardImeService extends InputMethodService {
     private boolean previousKeyEnter = false;
     private int KEYBOARD_VERSION = 4;
@@ -61,11 +52,21 @@ public class KeyboardImeService extends InputMethodService {
     List<String> suggestions = new ArrayList<String>();
     private int page = 1;
     private String wholeWord = "";
-
+    private SQLiteDatabase db;
 //    Thread changeColor;
 
+    private String previousString = "";
+    private String[] keys3Line = {"q", "w", "e", "r", "t", "y", "u", "i"," o", "p"};
+    private String[] keys4Line = {"q", "s", "c", "t", "h", "m", "p"};
+    private int codeGlobal = 0;
     @Override
     public View onCreateInputView() {
+        DatabaseManager.initializeDatabase(this);
+
+        DatabaseHelper dbHelper;
+        dbHelper = new DatabaseHelper(this);
+        db = dbHelper.getWritableDatabase();
+
         try {
             js = new JavaServer(this);
         } catch (IOException e) {
@@ -74,9 +75,7 @@ public class KeyboardImeService extends InputMethodService {
         rootView = (FrameLayout) this.getLayoutInflater().inflate(R.layout.keyboard_layout, null);
         controller = new Controller(getApplicationContext(), rootView, KEYBOARD_VERSION);
         controller.drawKeyboard();
-//        Color myWhite = new Color(255, 255, 254);
         temaImeLogger = new TemaImeLogger(getApplicationContext());
-        dictionarySuggestions = new DictionarySuggestions(getResources());
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         if (thread != null)
@@ -267,7 +266,6 @@ public class KeyboardImeService extends InputMethodService {
         Log.d("dalej", String.valueOf(keyboardShown));
         if (keyboardShown){
             if(keyCode == KeyEvent.KEYCODE_DPAD_CENTER){
-                Log.d("dalej", "nacisnieto");
                 Cell focus = controller.getFocusController_().getCurrentFocus();
                 Key key = controller.getKeysController().getKeyAtPosition(focus);
 
@@ -314,6 +312,7 @@ public class KeyboardImeService extends InputMethodService {
             controller.moveFocusOnKeyboard(newCell);
 
             wholeWord = "";
+            previousString = "";
             page = 1;
             emptySuggestions();
             return;
@@ -328,8 +327,13 @@ public class KeyboardImeService extends InputMethodService {
             if(Objects.equals(wholeWord, ""))
                 ic.deleteSurroundingText(1, 0);
             wholeWord = removeLastChar(wholeWord);
-            suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+            previousString = removeLastChar(previousString);
+            Log.d("czasami", previousString);
+            suggestionQuery();
             updateSuggestions(suggestions, 1);
+
+//            suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+//            updateSuggestions(suggestions, 1);
             page = 1;
             return;
         }
@@ -349,8 +353,43 @@ public class KeyboardImeService extends InputMethodService {
         }
 
         wholeWord += code;
-        suggestions = dictionarySuggestions.getWords(wholeWord, KEYBOARD_VERSION);
+        codeGlobal = code;
+        String[] line = keys4Line;
+        if(KEYBOARD_VERSION == 3) {
+            line = keys3Line;
+        }
+        previousString += line[codeGlobal];
+        suggestionQuery();
         updateSuggestions(suggestions, 1);
+    }
+
+    public void suggestionQuery(){
+        Cursor cursor;
+        Log.d("wyraz", wholeWord);
+        String column = "fourth_column";
+        if(KEYBOARD_VERSION == 3)
+            column = "three_column";
+
+        if(wholeWord.length() <= 4) {
+            String whereClauseWithLength = column + " LIKE ? " + " AND LENGTH(" + column + ") = " + wholeWord.length();
+            Log.d("wyraz", whereClauseWithLength);
+            cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "LENGTH(name) ASC");
+            Log.d("wyraz", "querka 4");
+        }
+        else {
+            String whereClause = column + " LIKE ?";
+            cursor = db.query("dictionary", null, whereClause, new String[]{wholeWord + "%"}, null, null, "LENGTH(name) ASC");
+            Log.d("wyraz", "querka 3");
+        }
+        suggestions.clear();
+        Log.d("wyraz", "wielkosc: " + cursor.getCount());
+        if (cursor.moveToFirst()) {
+            do {
+                String value = cursor.getString(cursor.getColumnIndex("name"));
+                suggestions.add(value);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
     }
 
     public void emptySuggestions(){
@@ -363,29 +402,33 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     public void updateSuggestions(List<String> suggestions, int page) {
-        Log.d("sugestie", String.valueOf(suggestions));
         int max = Controller.COLS;
         int maxWordInRow = Controller.COLS - 1;
         int previousSuggestionRange = (page - 1) * maxWordInRow;
         int suggestionRange = page * maxWordInRow;
-//        max = page * maxWordInRow;
-        Log.d("miedzy", previousSuggestionRange + " " + suggestionRange);
+
         if (suggestions.size() < suggestionRange && suggestions.size() >= previousSuggestionRange)
             max = suggestions.size() - previousSuggestionRange + 1;
-        Log.d("miedzy max", String.valueOf(max));
-
-        if (max > 0){
+        Log.d("czasami", String.valueOf(max));
+        if(max > 1) {
+            previousString = suggestions.get(0);
+            Log.d("czasami", previousString);
+        }
+        if (max > 1){
             for (int i = 1; i < max; i++) {
                 Cell hintCell = new Cell(0, i);
                 controller.modifyKeyContent(hintCell, suggestions.get(i + previousSuggestionRange - 1));
-                Log.d("index", "index: " + String.valueOf(i));
-                Log.d("index", "index in dictionary: " + String.valueOf(i + previousSuggestionRange - 1));
-                Log.d("slowo", "index in dictionary: " + suggestions.get(i + previousSuggestionRange - 1));
             }
             for (int i = max; i <= maxWordInRow; ++i) {
                 Cell hintCell = new Cell(0, i);
                 controller.modifyKeyContent(hintCell, "");
             }
+        }
+        else if(max == 1){
+            Log.d("czasami", "weszlo");
+
+            Cell hintCell = new Cell(0, 1);
+            controller.modifyKeyContent(hintCell, previousString);
         }
     }
 

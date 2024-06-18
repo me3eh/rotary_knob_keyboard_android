@@ -24,6 +24,6 @@ android {
 }
 
 dependencies {
-
+    implementation 'androidx.sqlite:sqlite:2.1.0'
     implementation 'androidx.leanback:leanback:1.0.0'
 }
