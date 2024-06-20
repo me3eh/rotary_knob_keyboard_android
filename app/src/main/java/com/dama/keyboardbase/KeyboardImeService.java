@@ -34,7 +34,6 @@ public class KeyboardImeService extends InputMethodService {
     private boolean previousKeyEnter = false;
     private int KEYBOARD_VERSION = 4;
     private Controller controller;
-    private DictionarySuggestions dictionarySuggestions;
     private boolean keyboardShown;
     private InputConnection ic;
     private FrameLayout rootView;
@@ -164,9 +163,6 @@ public class KeyboardImeService extends InputMethodService {
             hideKeyboard();
             return true;
         }
-        Log.d("steering", String.valueOf(keyCode));
-        Log.d("steering", "keycode: " + String.valueOf(keyCode));
-        Log.d("steering", "event: " + String.valueOf(event));
         return super.onKeyDown(keyCode, event);
     }
 
@@ -217,9 +213,6 @@ public class KeyboardImeService extends InputMethodService {
                     }
                     Cell focus = controller.getFocusController_().getCurrentFocus();
                     Cell newCell = controller.findNewFocus(keyCode);
-                    Log.d("aktualna pozycja", String.valueOf(focus));
-                    Log.d("nastepna pozycja", String.valueOf(newCell));
-
                     if (controller.isNextFocusable(newCell)){
                         //update focus
                         controller.getFocusController_().setCurrentFocus(newCell);
@@ -429,18 +422,11 @@ public class KeyboardImeService extends InputMethodService {
     private void commitSuggestion(String suggestion) {
         InputConnection inputConnection = getCurrentInputConnection();
         if (inputConnection != null) {
-//            inputConnection.deleteSurroundingText(wholeWord.length(), 0);
-//            wholeWord = "";
             inputConnection.commitText(suggestion, 1);
             inputConnection.commitText(" ", 1);
         }
     }
 
-//    private void emptySuggestions(){
-//        controller.modifyKeyContent(hint1, "");
-//        controller.modifyKeyContent(hint2, "");
-//        controller.modifyKeyContent(hint3, "");
-//    }
     private String removeLastChar(String str) {
         if(str != null && !str.trim().isEmpty())
             return str.substring(0, str.length() - 1);
@@ -450,7 +436,15 @@ public class KeyboardImeService extends InputMethodService {
     private void hideKeyboard(){
         requestHideSelf(0); //calls onFinishInputView
     }
+    private void createDirectoryDatabase(){
+        File dbDirectory = getApplicationContext().getDatabasePath("nothing");
+
+        if(!dbDirectory.exists())
+            dbDirectory.mkdirs();
+    }
     private void copyDatabaseFromAssetsToDevice(){
+        createDirectoryDatabase();
+
         String dbName = "sample.db";
         InputStream inputStream;
         try {
