@@ -15,16 +15,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-//        db.execSQL("CREATE TABLE dictionary (" +
-//                "                    id INTEGER PRIMARY KEY," +
-//                "                    name TEXT," +
-//                "                    three_column TEXT," +
-//                "                    fourth_column TEXT" +
-//                "                )");
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS dictionary");
         onCreate(db);
     }
 }

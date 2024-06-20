@@ -21,7 +21,11 @@ import com.dama.log.TemaImeLogger;
 import com.dama.utils.Cell;
 import com.dama.utils.Key;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -29,8 +33,6 @@ import java.util.Objects;
 public class KeyboardImeService extends InputMethodService {
     private boolean previousKeyEnter = false;
     private int KEYBOARD_VERSION = 4;
-    private int SPACE_INDEX = 11;
-//    private int SPACE_INDEX_3 = 13;
     private Controller controller;
     private DictionarySuggestions dictionarySuggestions;
     private boolean keyboardShown;
@@ -38,11 +40,6 @@ public class KeyboardImeService extends InputMethodService {
     private FrameLayout rootView;
     private TemaImeLogger temaImeLogger;
     private boolean longPress = false;
-//    private Cell hint1 = new Cell(0, 0);
-//    private Cell hint2 = new Cell(0, 1);
-//    private Cell hint3 = new Cell(0, 2);
-//    private Cell space_button = new Cell(0, SPACE_INDEX);
-//    private boolean
     boolean flag = false;
 
     boolean flag2 = false;
@@ -61,6 +58,8 @@ public class KeyboardImeService extends InputMethodService {
     private int codeGlobal = 0;
     @Override
     public View onCreateInputView() {
+        copyDatabaseFromAssetsToDevice();
+
         DatabaseManager.initializeDatabase(this);
 
         DatabaseHelper dbHelper;
@@ -109,6 +108,7 @@ public class KeyboardImeService extends InputMethodService {
         keyboardShown = false;
         ic = null;
         wholeWord = "";
+        previousString = "";
         page = 1;
     }
 
@@ -449,5 +449,30 @@ public class KeyboardImeService extends InputMethodService {
     }
     private void hideKeyboard(){
         requestHideSelf(0); //calls onFinishInputView
-    }}
+    }
+    private void copyDatabaseFromAssetsToDevice(){
+        String dbName = "sample.db";
+        InputStream inputStream;
+        try {
+            inputStream = getApplicationContext().getAssets().open(dbName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        File dbFile = new File(getApplicationContext().getApplicationInfo().dataDir + "/databases/", dbName);
+        try {
+            OutputStream outputStream = new FileOutputStream(dbFile);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            inputStream.close();
+            outputStream.close();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+
 
