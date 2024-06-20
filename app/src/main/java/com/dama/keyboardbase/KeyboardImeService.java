@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class KeyboardImeService extends InputMethodService {
-    private boolean previousKeyEnter = false;
     private int KEYBOARD_VERSION = 4;
     private Controller controller;
     private boolean keyboardShown;
@@ -97,7 +96,6 @@ public class KeyboardImeService extends InputMethodService {
     @Override
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
-        previousKeyEnter = false;
         keyboardShown = true;
     }
 
@@ -172,10 +170,6 @@ public class KeyboardImeService extends InputMethodService {
             StrictMode.setThreadPolicy(policy);
             ic = getCurrentInputConnection();
 
-            if(keyCode == KeyEvent.KEYCODE_DPAD_RIGHT || keyCode == KeyEvent.KEYCODE_DPAD_LEFT){
-                if(previousKeyEnter)
-                    hideKeyboard();
-            }
             switch (keyCode){
                 case KeyEvent.KEYCODE_1:
                     wholeWord = "";
@@ -298,6 +292,12 @@ public class KeyboardImeService extends InputMethodService {
             emptySuggestions();
             return;
         }
+        if(code == 66) {
+            wholeWord = "";
+            previousString = "";
+            ic.commitText("\n", 1);
+            return;
+        }
         if(code == 3000 || code == 3001){
             Cell newCell = new Cell(code - 3000, 0);
             controller.getFocusController_().setCurrentFocus(newCell);
@@ -318,12 +318,6 @@ public class KeyboardImeService extends InputMethodService {
                 updateSuggestions(suggestions, 1);
             }
             page = 1;
-            return;
-        }
-        if (code == 1003){
-            wholeWord = "";
-            previousString = "";
-            previousKeyEnter = true;
             return;
         }
         if (code == 1001){
