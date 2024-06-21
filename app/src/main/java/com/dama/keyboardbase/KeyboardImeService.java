@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class KeyboardImeService extends InputMethodService {
-    private int KEYBOARD_VERSION = 4;
+    private int KEYBOARD_VERSION = 3;
     private Controller controller;
     private boolean keyboardShown;
     private InputConnection ic;

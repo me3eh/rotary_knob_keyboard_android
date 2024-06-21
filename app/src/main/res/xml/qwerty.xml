@@ -17,18 +17,18 @@
     </Row>
     <Row>
         <Key android:codes="3000" android:keyLabel="↑"/>
-        <Key android:codes="0" android:keyLabel="qaz"  />
-        <Key android:codes="1" android:keyLabel="wsx" />
-        <Key android:codes="2" android:keyLabel="edc" />
-        <Key android:codes="3" android:keyLabel="rfv" />
-        <Key android:codes="4" android:keyLabel="tgb" />
-        <Key android:codes="5" android:keyLabel="yhn" />
-        <Key android:codes="6" android:keyLabel="ujm" />
-        <Key android:codes="7" android:keyLabel="ik" />
-        <Key android:codes="8" android:keyLabel="olp" />
+        <Key android:codes="0" android:keyLabel="q\na\nz" />
+        <Key android:codes="1" android:keyLabel="w\ns\nx" />
+        <Key android:codes="2" android:keyLabel="e\nd\nc" />
+        <Key android:codes="3" android:keyLabel="r\nf\nv" />
+        <Key android:codes="4" android:keyLabel="t\ng\nb" />
+        <Key android:codes="5" android:keyLabel="y\nh\nn" />
+        <Key android:codes="6" android:keyLabel="u\nj\nm" />
+        <Key android:codes="7" android:keyLabel="i\nk\n " />
+        <Key android:codes="8" android:keyLabel="o\nl\np" />
         <Key android:codes="1001" android:keyLabel="␣" />
-        <Key android:codes="1002" android:keyLabel="back" />
-        <Key android:codes="66" android:keyLabel="enter" />
+        <Key android:codes="1002" android:keyLabel="⌫" />
+        <Key android:codes="66" android:keyLabel="⏎" />
         <Key android:codes="-1" android:keyLabel="" />
         <Key android:codes="-1" android:keyLabel="" />
     </Row>
