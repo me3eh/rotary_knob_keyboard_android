@@ -58,49 +58,7 @@ public class Controller {
     }
 
     public Cell findNewFocus(int code){
-        Cell curFocus = focusController.getCurrentFocus();
         Cell newFocus = focusController.calculateNewFocus(code);
-
-        switch (code){
-            case KeyEvent.KEYCODE_DPAD_UP:
-                //todo mod
-                //last row behaviour focus
-                if((curFocus.getRow() == ROWS-1)){
-                    switch (curFocus.getCol()){
-                        case 4:
-                            newFocus.setCol(7);
-                            break;
-                        case 5:
-                            newFocus.setCol(8);
-                            break;
-                        case 6:
-                            newFocus.setCol(9);
-                            break;
-                    }
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                //last row behaviour focus
-                if((curFocus.getRow() == ROWS-2)){
-                    switch (curFocus.getCol()){
-                        case 4:
-                        case 5:
-                        case 6:
-                            newFocus.setCol(3);
-                            break;
-                        case 7:
-                            newFocus.setCol(4);
-                            break;
-                        case 8:
-                            newFocus.setCol(5);
-                            break;
-                        case 9:
-                            newFocus.setCol(6);
-                            break;
-                    }
-                }
-                break;
-        }
 
         return newFocus;
     }
