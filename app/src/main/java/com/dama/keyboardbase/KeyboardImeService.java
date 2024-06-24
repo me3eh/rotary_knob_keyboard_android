@@ -51,7 +51,7 @@ public class KeyboardImeService extends InputMethodService {
 //    Thread changeColor;
 
     private String previousString = "";
-    private String[] keys3Line = {"q", "w", "e", "r", "t", "y", "u", "i"," o", "p"};
+    private String[] keys3Line = {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p"};
     private String[] keys4Line = {"q", "s", "c", "t", "h", "m", "p"};
     private int codeGlobal = 0;
     @Override
@@ -350,28 +350,56 @@ public class KeyboardImeService extends InputMethodService {
         if(KEYBOARD_VERSION == 3)
             column = "three_column";
 
-//        if(wholeWord.length() <= 4) {
-        String whereClauseWithLength = column + " LIKE ? " +
-                " AND LENGTH(" + column + ") >= " + wholeWord.length() +
-                " AND LENGTh(" + column + ") <= " + (wholeWord.length() + 2);
-        Log.d("wyraz", whereClauseWithLength);
-        cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "LENGTH(name) ASC");
-        Log.d("wyraz", "querka 4");
+        suggestions.clear();
+        String[] conditions = {" AND LENGTH(" + column + ") = " + wholeWord.length(), " AND LENGTH(" + column + ") >= " + wholeWord.length()};
+
+        //for(int i = 0; i < conditions.length; i++) {
+            //if(suggestions.size() > 10) break;
+            String whereClauseWithLength = column + " LIKE ? " +
+                    " AND LENGTH(" + column + ") = " + wholeWord.length();
+//                " AND LENGTh(" + column + ") <= " + (wholeWord.length() + 2);
+
+
+            Log.d("wyraz", whereClauseWithLength);
+            cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "id ASC");
+            Log.d("wyraz", "querka 4");
 //        }
 //        else {
 //            String whereClause = column + " LIKE ?";
 //            cursor = db.query("dictionary", null, whereClause, new String[]{wholeWord + "%"}, null, null, "LENGTH(name) ASC");
 //            Log.d("wyraz", "querka 3");
 //        }
-        suggestions.clear();
-        Log.d("wyraz", "wielkosc: " + cursor.getCount());
-        if (cursor.moveToFirst()) {
-            do {
-                String value = cursor.getString(cursor.getColumnIndex("name"));
-                suggestions.add(value);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
+
+            Log.d("wyraz", "wielkosc: " + cursor.getCount());
+            if (cursor.moveToFirst()) {
+                do {
+                    String value = cursor.getString(cursor.getColumnIndex("name"));
+                    suggestions.add(value);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            if(suggestions.size() < 12) {
+                whereClauseWithLength = column + " LIKE ? " +
+                        " AND LENGTH(" + column + ") > " + wholeWord.length();
+
+                Log.d("wyraz", whereClauseWithLength);
+                cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "id ASC");
+                Log.d("wyraz", "querka 4");
+
+
+                Log.d("wyraz", "wielkosc: " + cursor.getCount());
+                if (cursor.moveToFirst()) {
+                    do {
+                        String value = cursor.getString(cursor.getColumnIndex("name"));
+                        if(suggestions.isEmpty()) {
+                            suggestions.add(value.substring(0, wholeWord.length()));
+                        }
+                        suggestions.add(value);
+                    } while (cursor.moveToNext() && suggestions.size() < 12);
+                }
+                cursor.close();
+            }
+       // }
     }
 
     public void emptySuggestions(){
@@ -384,6 +412,7 @@ public class KeyboardImeService extends InputMethodService {
     }
 
     public void updateSuggestions(List<String> suggestions, int page) {
+
         int max = Controller.COLS;
         int maxWordInRow = Controller.COLS - 1;
         int previousSuggestionRange = (page - 1) * maxWordInRow;
@@ -393,6 +422,7 @@ public class KeyboardImeService extends InputMethodService {
             max = suggestions.size() - previousSuggestionRange + 1;
         Log.d("czasami", String.valueOf(max));
         if(max > 1) {
+            Log.d("czasami-alfy", previousString);
             previousString = suggestions.get(0);
             Log.d("czasami", previousString);
         }
