@@ -72,20 +72,38 @@ public class KeyView extends ImageView {
         setBitmap();
 
         if(this.label != null && this.label.length()>0){
-            String[] lines = this.label.split("\n");
-            for (int i = 1; i < lines.length; i++) {
-                for (int j = 0; j < i; j++)
-                    lines[i] = "  " + lines[i];
+            Paint paint = createKeyLabel(labelColor);
+            float textWidth;
+            String[] lines;
+            if(this.label.length() > 7) {
+                int dim = (int) Math.ceil(this.label.length()/7f);
+                lines = new String[dim];
+                for(int i =0; i<dim; i++) {
+                    lines[i] = this.label.substring(i*7, Math.min((i+1)*7, this.label.length()));
+                }
+                textWidth = paint.measureText(lines[0]);
             }
+            else {
+
+                lines = this.label.split("\n");
+                for (int i = 1; i < lines.length; i++) {
+                    for (int j = 0; j < i; j++)
+                        lines[i] = "  " + lines[i];
+                }
+                textWidth = paint.measureText(lines[lines.length - 1]);
+            }
+
             Canvas canvas = new Canvas(this.bitmap);
             Rect bounds = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-            Paint paint = createKeyLabel(labelColor);
-            float textWidth = paint.measureText(lines[lines.length - 1]);
+
+
+
             float interline = paint.getTextSize() * 0.0625f;
             float textHeight = lines.length * (paint.getTextSize() + interline);
             float x = bounds.centerX() - (textWidth / 2);
             float y = bounds.centerY() + (textHeight / 2);
             //setContentDescription(this.label);
+
             for (int i = 0; i < lines.length; i++) {
                 int ii = lines.length - 1 - i;
                 canvas.drawText(lines[i], x, y - ii * (paint.getTextSize() + interline) - interline * 3, paint);
