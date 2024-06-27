@@ -75,7 +75,7 @@ public class KeyView extends ImageView {
             Paint paint = createKeyLabel(labelColor);
             float textWidth;
             String[] lines;
-            if(this.label.length() > 7) {
+            if(this.label.length() > 6) {
                 int dim = (int) Math.ceil(this.label.length()/7f);
                 lines = new String[dim];
                 for(int i =0; i<dim; i++) {

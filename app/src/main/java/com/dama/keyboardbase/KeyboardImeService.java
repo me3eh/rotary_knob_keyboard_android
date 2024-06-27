@@ -97,6 +97,9 @@ public class KeyboardImeService extends InputMethodService {
     public void onStartInputView(EditorInfo info, boolean restarting) {
         super.onStartInputView(info, restarting);
         keyboardShown = true;
+        wholeWord = "";
+        previousString = "";
+        page = 1;
     }
 
     @Override
@@ -295,8 +298,8 @@ public class KeyboardImeService extends InputMethodService {
         if(code == 66) {
             wholeWord = "";
             previousString = "";
-            ic.commitText("\n", 1);
             emptySuggestions();
+            ic.commitText("\n", 1);
             return;
         }
         if(code == 3000 || code == 3001){
@@ -345,61 +348,45 @@ public class KeyboardImeService extends InputMethodService {
 
     public void suggestionQuery(){
         Cursor cursor;
-        Log.d("wyraz", wholeWord);
         String column = "fourth_column";
         if(KEYBOARD_VERSION == 3)
             column = "three_column";
-
+        String whereClauseWithLength;
         suggestions.clear();
-        String[] conditions = {" AND LENGTH(" + column + ") = " + wholeWord.length(), " AND LENGTH(" + column + ") >= " + wholeWord.length()};
-
-        //for(int i = 0; i < conditions.length; i++) {
-            //if(suggestions.size() > 10) break;
-            String whereClauseWithLength = column + " LIKE ? " +
-                    " AND LENGTH(" + column + ") = " + wholeWord.length();
-//                " AND LENGTh(" + column + ") <= " + (wholeWord.length() + 2);
-
-
-            Log.d("wyraz", whereClauseWithLength);
-            cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "id ASC");
-            Log.d("wyraz", "querka 4");
+//        if(wholeWord.length() > 12 || wholeWord.length() < 4 ) {
+//            Log.d("start", "tu weszlo");
+//            whereClauseWithLength = column + " LIKE ? " +
+//                    " AND LENGTH(" + column + ") = " + wholeWord.length();
+//
+//            cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "id ASC");
+//
+//            if (cursor.moveToFirst()) {
+//                do {
+//                    String value = cursor.getString(cursor.getColumnIndex("name"));
+//                    suggestions.add(value);
+//                } while (cursor.moveToNext());
+//            }
+//            cursor.close();
 //        }
-//        else {
-//            String whereClause = column + " LIKE ?";
-//            cursor = db.query("dictionary", null, whereClause, new String[]{wholeWord + "%"}, null, null, "LENGTH(name) ASC");
-//            Log.d("wyraz", "querka 3");
-//        }
+//            else {
+            whereClauseWithLength = column + " LIKE ? " +
+                    " AND LENGTH(" + column + ") >= " + wholeWord.length();
 
-            Log.d("wyraz", "wielkosc: " + cursor.getCount());
+            cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "LENGTH(name) ASC, id ASC", "50");
+
             if (cursor.moveToFirst()) {
                 do {
                     String value = cursor.getString(cursor.getColumnIndex("name"));
+//                        if(suggestions.isEmpty()) {
+//                            suggestions.add(value.substring(0, wholeWord.length()));
+//                        }
                     suggestions.add(value);
                 } while (cursor.moveToNext());
             }
+            Log.d("sugestia", String.valueOf(suggestions));
+            Log.d("sugestia", String.valueOf(suggestions.size()));
             cursor.close();
-            if(suggestions.size() < 12) {
-                whereClauseWithLength = column + " LIKE ? " +
-                        " AND LENGTH(" + column + ") > " + wholeWord.length();
-
-                Log.d("wyraz", whereClauseWithLength);
-                cursor = db.query("dictionary", null, whereClauseWithLength, new String[]{wholeWord + "%"}, null, null, "id ASC");
-                Log.d("wyraz", "querka 4");
-
-
-                Log.d("wyraz", "wielkosc: " + cursor.getCount());
-                if (cursor.moveToFirst()) {
-                    do {
-                        String value = cursor.getString(cursor.getColumnIndex("name"));
-                        if(suggestions.isEmpty()) {
-                            suggestions.add(value.substring(0, wholeWord.length()));
-                        }
-                        suggestions.add(value);
-                    } while (cursor.moveToNext() && suggestions.size() < 12);
-                }
-                cursor.close();
-            }
-       // }
+//            }
     }
 
     public void emptySuggestions(){
@@ -420,13 +407,8 @@ public class KeyboardImeService extends InputMethodService {
 
         if (suggestions.size() < suggestionRange && suggestions.size() >= previousSuggestionRange)
             max = suggestions.size() - previousSuggestionRange + 1;
-        Log.d("czasami", String.valueOf(max));
-        if(max > 1) {
-            Log.d("czasami-alfy", previousString);
-            previousString = suggestions.get(0);
-            Log.d("czasami", previousString);
-        }
         if (max > 1){
+            previousString = suggestions.get(0);
             for (int i = 1; i < max; i++) {
                 Cell hintCell = new Cell(0, i);
                 controller.modifyKeyContent(hintCell, suggestions.get(i + previousSuggestionRange - 1));
