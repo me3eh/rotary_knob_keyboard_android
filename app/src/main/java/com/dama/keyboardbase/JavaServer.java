@@ -37,9 +37,6 @@ class JavaServer {
 
 
         boolean run = true;
-        Log.d("poszlo", "xD przed");
-
-//        server = new DatagramSocket(SERVERPORT, InetAddress.getByName(SERVER_IP));
         server = new DatagramSocket(CLIENTPORT);
         buffer = new byte[2];
         packet = new DatagramPacket(buffer, buffer.length, InetAddress.getByName(SERVER_IP), SERVERPORT);
@@ -52,7 +49,6 @@ class JavaServer {
                 int clientPort = packet.getPort();
                 if (message.equals("1")) {
                     keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_LEFT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT));
-//                    keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_LEFT, new KeyEvent(1 , 1));
                 }
                 else if (message.equals("2")) {
                     keyboard.onKeyDown(KeyEvent.KEYCODE_DPAD_RIGHT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));

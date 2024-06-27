@@ -27,7 +27,7 @@ public class Controller {
 
     public Controller(Context context, FrameLayout rootView, int version) {
         if(version == 3) {
-            COLS = 13;
+            COLS = 14;
             keysController = new KeysController(new Keyboard(context, R.xml.qwerty));
         }
         else{

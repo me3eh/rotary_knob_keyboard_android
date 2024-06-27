@@ -14,6 +14,7 @@
         <Key android:codes="4009" android:keyLabel="" />
         <Key android:codes="4010" android:keyLabel="" />
         <Key android:codes="4011" android:keyLabel="" />
+        <Key android:codes="4012" android:keyLabel="" />
     </Row>
     <Row>
         <Key android:codes="3000" android:keyLabel="↑"/>
@@ -25,7 +26,8 @@
         <Key android:codes="5" android:keyLabel="y\nh\nn" />
         <Key android:codes="6" android:keyLabel="u\nj\nm" />
         <Key android:codes="7" android:keyLabel="i\nk\n " />
-        <Key android:codes="8" android:keyLabel="o\nl\np" />
+        <Key android:codes="8" android:keyLabel="o\nl\n" />
+        <Key android:codes="9" android:keyLabel="p" />
         <Key android:codes="1001" android:keyLabel="␣" />
         <Key android:codes="1002" android:keyLabel="⌫" />
         <Key android:codes="66" android:keyLabel="⏎" />
