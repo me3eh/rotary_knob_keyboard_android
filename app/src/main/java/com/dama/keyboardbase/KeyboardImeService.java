@@ -270,7 +270,14 @@ public class KeyboardImeService extends InputMethodService {
             case Controller.DEL_KEY:
                 ic.deleteSurroundingText(1, 0);
                 break;
-            case Controller.ENTER_KEY:
+            case Controller.ENTER_KEY: // 66
+                previousString = "";
+                Cell firstHint = new Cell(0, 1);
+                String value = controller.getLabelAtPosition(firstHint);
+                wholeWord = "";
+                page = 1;
+                emptySuggestions();
+                if (!value.isEmpty()) ic.commitText(value, 1);
                 ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
                 ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
                 break;
@@ -295,13 +302,13 @@ public class KeyboardImeService extends InputMethodService {
             emptySuggestions();
             return;
         }
-        if(code == 66) {
-            wholeWord = "";
-            previousString = "";
-            emptySuggestions();
-            ic.commitText("\n", 1);
-            return;
-        }
+//        if(code == 66) {
+//            wholeWord = "";
+//            previousString = "";
+//            emptySuggestions();
+//            ic.commitText("\n", 1);
+//            return;
+//        }
         if(code == 3000 || code == 3001){
             Cell newCell = new Cell(code - 3000, 0);
             controller.getFocusController_().setCurrentFocus(newCell);
